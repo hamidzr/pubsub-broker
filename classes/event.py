@@ -11,4 +11,4 @@ class Event:
 		self.body = body
 
 	def toString(self):
-		return "{0}, {1}".format(topic, body)
+		return "{0}, {1}".format(self.topic, self.body)
