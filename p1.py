@@ -1,7 +1,9 @@
 from classes.publisher import *
 import time
 
-p1 = Publisher()
+#create a publisher and pass in intial configuration
+p1 = Publisher('127.0.0.1:5555',1)
+
 # keep publishing
 while True:
 	e1 = Event('topic a','body a')

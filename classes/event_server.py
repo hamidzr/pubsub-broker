@@ -1,10 +1,28 @@
+import zmq
+from classes.event import *
 class EventServer:
 	# attribiutes
-	i = 12345
 
+	context = zmq.Context()
+	pullSocket = context.socket(zmq.PULL)
+	pubSocket = context.socket(zmq.PUB)
 	# constructor
 	def __init__(self):
-		self.data = []
+		self.pullSocket.bind("tcp://*:5555")
+		self.pubSocket.bind("tcp://*:6666")
 
-	def f(self):
-		return 'hello world'
+	def getEvent(self):
+		event = Event.deSerialize(self.pullSocket.recv())
+		# redundant serialization
+		print('received: ', event.serialize());
+		return event
+
+	def publish(self, event):
+		self.pubSocket.send_string(event.serialize())
+		print('published: ' + event.serialize())
+
+	def start(self):
+		# multithreaded??
+		while True:
+			event = self.getEvent()
+			self.publish(event)

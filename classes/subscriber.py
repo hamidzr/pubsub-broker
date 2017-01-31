@@ -8,7 +8,7 @@ class Subscriber:
 	socket = context.socket(zmq.SUB)
 	
 	# constructor
-	def __init__(self,esAddr = "127.0.0.1:5555"):
+	def __init__(self,esAddr = "127.0.0.1:6666"):
 		# self.data = []
 		self.socket.connect("tcp://" + esAddr)
 		
