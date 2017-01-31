@@ -11,6 +11,10 @@ class Publisher:
 		# self.data = []
 		self.socket.connect("tcp://" + esAddr)
 		self.strength = strength
+
+	def register(self):
+		self.socket.send_string("register-publisher-myIp")
+
 	
 	def publish(self, event):
 		self.socket.send_string(event.serialize())
