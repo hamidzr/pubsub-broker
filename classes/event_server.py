@@ -7,7 +7,9 @@ class EventServer:
 	pullSocket = context.socket(zmq.PULL)
 	pubSocket = context.socket(zmq.PUB)
 	history=[]
-	publishers={}
+	publishers=[]
+	# a set of current best publisher IDs
+	dominantPublishers=[] # TODO generate a python set of dominant publisher IDs
 
 	# constructor
 	def __init__(self):
@@ -15,18 +17,24 @@ class EventServer:
 		self.pubSocket.bind("tcp://*:6666")
 
 	def detectMsgType(self):
-		msg = self.pullSocket.recv()
-		if msg.startswith('register'):
-			self.register(msg)
+		string = self.pullSocket.recv()
+		msgType = string[0]
+		publisherId = string[1:].split('-')[0] # OPTIMIZE omg needs improving
+		msg = string[1:].split('-')[1]
+
+		# check if message is a register req
+		if msgType == 'r':
+			self.handleRegistration(publisherId,msg)
 			return False
 		else:
-			# check if it's a good source
-			msgArr = msg.split('-')
-			return self.getEvent(msgArr[1])
+			# check if it's a good source. check against a good 'set' of publishers
+			if True:
+				return self.getEvent(msg)
+			else:
+				print('discarded a weak event')
 
 	def getEvent(self,string):
 		event = Event.deSerialize(string)
-		# redundant serialization
 		print('received event: ', event.serialize());
 		return event
 
@@ -34,9 +42,13 @@ class EventServer:
 		self.pubSocket.send_string(event.serialize())
 		print('published: ' + event.serialize())
 
-	def register(self,msg):
-		# QUESTION  how to detect who is sending?
-		print 'registration req received', msg
+	def handleRegistration(self,pId,msg):
+		# currently handles publisher registration
+		msgArr = msg.split(', ')
+		self.publishers.append({'pId': pId, 'addr':msgArr[0],'topic':msgArr[1], 'os':msgArr[2]})
+		print 'publisher registred', pId, msg
+		print 'current publishers array: ', self.publishers
+		
 
 	def store(self,event):
 		self.history.append(event)

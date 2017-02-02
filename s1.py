@@ -5,7 +5,7 @@ from classes.event import *
 s1 = Subscriber()
 
 #subscribe to a topic
-s1.subscribe("topic a")
+s1.subscribe("a")
 while True:
 	event = Event.deSerialize(s1.socket.recv_string())
 	print('recieved: '+ event.topic)

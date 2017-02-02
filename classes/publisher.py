@@ -2,21 +2,26 @@ import zmq
 from classes.event import *
 from random import randint
 
+# assumptions:
+# 	only one topic per publisher
 class Publisher:
 	# attribiutes
-	ip = randint(0,10000)
+	addr = randint(1000,9999)
+	pId = randint(0,999)
 	context = zmq.Context()
 	socket = context.socket(zmq.PUSH)
+	topic = 'a'
     # constructor
-	def __init__(self, esAddr = '127.0.0.1:5555',strength = 1):
+	def __init__(self, esAddr, strength ,topic):
 		# self.data = []
 		self.socket.connect("tcp://" + esAddr)
 		self.strength = strength
 
 	def register(self):
-		self.socket.send_string("register-publisher-ip:myIp-strength:{}-ip:{}".format(self.strength,self.ip))
+
+		self.socket.send_string("r{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
 
 	
 	def publish(self, event):
-		self.socket.send_string("{}-{}".format(self.ip, event.serialize()))
+		self.socket.send_string("e{}-{}".format(self.pId, event.serialize()))
 		print('published: ' + event.serialize())
