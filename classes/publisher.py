@@ -10,11 +10,12 @@ class Publisher:
 	pId = randint(0,999)
 	context = zmq.Context()
 	socket = context.socket(zmq.PUSH)
-	topic = 'a'
+	topic = 'unknown'
     # constructor
 	def __init__(self, esAddr, strength ,topic):
 		# self.data = []
 		self.socket.connect("tcp://" + esAddr)
+		self.topic = topic
 		self.strength = strength
 
 	def register(self):

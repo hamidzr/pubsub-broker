@@ -12,6 +12,7 @@ class EventServer:
 	# a set of current best publisher IDs
 	publisher=collections.namedtuple('publisher', 'pId addr topic os') # TODO generate a python set of dominant publisher IDs
 	dominantPublishers=[]
+	publishers=[] # keep a log of all publishers for future use
 	# constructor
 	def __init__(self):
 		self.pullSocket.bind("tcp://*:5555")
@@ -49,6 +50,8 @@ class EventServer:
 		#self.publishers.append({'pId': pId, 'addr':msgArr[0],'topic':msgArr[1], 'os':msgArr[2]})
 		toAppend =False #reminder for whether register this publisher
 		print '!!!!!!!!!!!!! Entered the function'
+		# store the publisher in a publishers array for later use (if a publisher failed)
+		self.publishers.append(self.publisher._make([pId,msgArr[0],msgArr[1],msgArr[2]]))
 		if len(self.dominantPublishers)==0:
 			toAppend=True
 			print '!!!!!!!!!!!!! Nothing in the dps'	
@@ -58,21 +61,24 @@ class EventServer:
 				if dp.os<msgArr[2]: #remove every publisher with lower os
 					self.dominantPublishers.remove(dp)
 					toAppend=True
-				elif dp.os==msgArr[2]: #when the two have same os, keep them both
-					toAppend=True
+				# dont keep add it to dominant publishers if they have the same os
+				# elif dp.os==msgArr[2]: #when the two have same os, keep them both
+				# 	toAppend=True
 				else:
 					break 	#dont do anything since there is already a publisher with higher os
 			else:
-				toAppend=true #since no publisher found, register this new publisher 
+				toAppend=True #since no publisher found, register this new publisher 
 		if toAppend:	#check if need to register this publisher
 			print '!!!!!!!!!!!!! Im gonna append'			
 			self.dominantPublishers.append(self.publisher._make([pId,msgArr[0],msgArr[1],msgArr[2]]))
 		
 		print 'Number of elem in PDS', len(self.dominantPublishers)
-		print 'publisher registred', pId, msg
-		print 'current publishers array: '
+		print 'publisher registr request', pId, msg
+		print 'current dominantpublishers array: '
 		for p in self.dominantPublishers:
 			print 'pId %s , address %s , topic %s , strength %s' % p
+		print 'current dominant publishers: ',self.dominantPublishers
+		print 'list of all registered publishers: ',self.publishers
 
 	def store(self,event):
 		self.history.append(event)
