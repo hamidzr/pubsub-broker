@@ -12,6 +12,7 @@ class EventServer:
 	# a set of current best publisher IDs
 	publisher=collections.namedtuple('publisher', 'pId addr topic os') # TODO generate a python set of dominant publisher IDs
 	dominantPublishers=[]
+	dominantPublishersSet=set()
 	publishers=[] # keep a log of all publishers for future use
 	# constructor
 	def __init__(self):
@@ -30,7 +31,7 @@ class EventServer:
 			return False
 		else:
 			# check if it's a good source. check against a good 'set' of publishers
-			if True:
+			if publisherId in self.dominantPublishersSet:
 				return self.getEvent(msg)
 			else:
 				print('discarded a weak event')
@@ -60,8 +61,9 @@ class EventServer:
 			if dp.topic is msgArr[1]:  #found the publisher with same topic
 				if dp.os<msgArr[2]: #remove every publisher with lower os
 					self.dominantPublishers.remove(dp)
+					self.dominantPublishersSet.remove(dp.pId)
 					toAppend=True
-				# dont keep add it to dominant publishers if they have the same os
+				# dont keep a publisher with same OS,
 				# elif dp.os==msgArr[2]: #when the two have same os, keep them both
 				# 	toAppend=True
 				else:
@@ -71,6 +73,7 @@ class EventServer:
 		if toAppend:	#check if need to register this publisher
 			print '!!!!!!!!!!!!! Im gonna append'			
 			self.dominantPublishers.append(self.publisher._make([pId,msgArr[0],msgArr[1],msgArr[2]]))
+			self.dominantPublishersSet.add(pId)
 		
 		print 'Number of elem in PDS', len(self.dominantPublishers)
 		print 'publisher registr request', pId, msg
@@ -78,6 +81,7 @@ class EventServer:
 		for p in self.dominantPublishers:
 			print 'pId %s , address %s , topic %s , strength %s' % p
 		print 'current dominant publishers: ',self.dominantPublishers
+		print 'current dominant publishers set: ',self.dominantPublishersSet
 		print 'list of all registered publishers: ',self.publishers
 
 	def store(self,event):

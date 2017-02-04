@@ -1,0 +1,2 @@
+set publishers instances to get topic and OS as an argument ( for scripting purposes )
+generate / decide network topology

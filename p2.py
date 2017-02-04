@@ -3,7 +3,7 @@ from random import randint
 import time
 
 #create a publisher and pass in intial configuration
-p1 = Publisher('127.0.0.1:5555',0,'a')
+p1 = Publisher('127.0.0.1:5555',0,'b')
 p1.register()
 # keep publishing
 while True:
