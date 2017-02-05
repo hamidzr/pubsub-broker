@@ -1,2 +1,4 @@
 set publishers instances to get topic and OS as an argument ( for scripting purposes )
 generate / decide network topology
+Should work with all these properties including failing publishers
+Do end-to-end measurements (time between publication and receipt of info; since the clock is the same on all emulated hosts, we do not have the issue of clocks drifting apart from each other).
