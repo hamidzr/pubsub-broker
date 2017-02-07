@@ -2,7 +2,7 @@ import zmq
 
 class Subscriber:
 	# attribiutes
-	interestedTopics = []
+	interestedTopic = 'default'
 
 	context = zmq.Context()
 	socket = context.socket(zmq.SUB)
@@ -12,6 +12,9 @@ class Subscriber:
 		# self.data = []
 		self.socket.connect("tcp://" + esAddr)
 		
+	def register(self,topic):
+		pass
+		# TODO : SEND AN ID LIKE PUBLISHER
 	def subscribe(self, sFilter):
 		# any subscriber must use the SUBSCRIBE to set a subscription, i.e., tell the
 		# system what it is interested in

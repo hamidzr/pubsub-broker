@@ -10,11 +10,14 @@ class EventServer:
 	pubSocket = context.socket(zmq.PUB)
 	history={}  #History is a dictionary that mapping from topic name to deque
 	
-	# a set of current best publisher IDs
 	publisher=collections.namedtuple('publisher', 'pId addr topic os') # TODO generate a python set of dominant publisher IDs
 	dominantPublishers=[]
+	# a set of current best publisher IDs, for better lookup performance
 	dominantPublishersSet=set()
 	publishers=[] # keep a log of all publishers for future use
+	subscriber=collections.namedtuple('subscriber', 'sId addr topic') # TODO generate a python set of dominant publisher IDs
+	subscribers=[]
+
 	# constructor
 	def __init__(self):
 		self.pullSocket.bind("tcp://*:5555")
@@ -22,17 +25,21 @@ class EventServer:
 
 	def detectMsgType(self):
 		string = self.pullSocket.recv()
-		msgType = string[0]
-		publisherId = string[1:].split('-')[0] # OPTIMIZE omg needs improving
-		msg = string[1:].split('-')[1]
+		msgType = string[0:2]
+		Id = string[2:].split('-')[0] # OPTIMIZE omg needs improving
+		msg = string[2:].split('-')[1]
 
 		# check if message is a register req
-		if msgType == 'r':
-			self.handleRegistration(publisherId,msg)
+		if msgType == 'rp':
+			self.handlePublisherRegistration(Id,msg)
 			return False
+		elif msgType == 'rs':
+			self.handleSubscriberRegistration(Id,msg)
+			return False			
 		else:
 			# check if it's a good source. check against a good 'set' of publishers
-			if publisherId in self.dominantPublishersSet:
+			# if you reach here it must be an event from a publisher
+			if Id in self.dominantPublishersSet:
 				self.store(self.getEvent(msg))
 			else:
 				print('discarded a weak event')
@@ -50,7 +57,7 @@ class EventServer:
 		self.pubSocket.send_string(event.serialize())
 		print('published: ' + event.serialize())
 
-	def handleRegistration(self,pId,msg):
+	def handlePublisherRegistration(self,pId,msg):
 		# currently handles publisher registration
 		msgArr = msg.split(', ')
 		#self.publishers.append({'pId': pId, 'addr':msgArr[0],'topic':msgArr[1], 'os':msgArr[2]})
@@ -89,8 +96,10 @@ class EventServer:
 		print 'current dominant publishers set: ',self.dominantPublishersSet
 		print 'list of all registered publishers: ',self.publishers
 
-
 		self.store(self.getEvent(msg))
+
+	def handleSubscriberRegistration(self,sId,msg):
+		pass
 
 	def store(self,event):
 		if event.topic in self.history:
@@ -114,4 +123,5 @@ class EventServer:
 		while True:
 			# if the message is an event
 			self.detectMsgType()
+			# TODO we dont want to put everythin in detectMsgType()
 			
