@@ -1,6 +1,6 @@
-set publishers instances (p1,p2,..)  to get topic and OS as an argument ( for scripting purposes )
-generate / decide network topology for mininet. ( to test and showcase our code )
-we should assume that publishers might fail and prepare for it.
-Do end-to-end measurements (time between publication and receipt of info; since the clock is the same on all emulated hosts, we do not have the issue of clocks drifting apart from each other).
+DONE # set publishers instances (p1,p2,..)  to get topic and OS as an argument ( for scripting purposes )
+# generate / decide network topology for mininet. ( to test and showcase our code )
+# we should assume that publishers might fail and prepare for it.
+# Do end-to-end measurements (time between publication and receipt of info; since the clock is the same on all emulated hosts, we do not have the issue of clocks drifting apart from each other).
 
-Complete the history container, which is able to hold message of different topic respectively
+# Complete the history container, which is able to hold message of different topic respectively
