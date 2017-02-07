@@ -104,8 +104,10 @@ class EventServer:
 		msgArr = msg.split(', ')
 		addr = msgArr[0]
 		topic = msgArr[1]
-		self.subscribers.append(self.subscriber._make([sId,addr,topic]))
+		subscriber = self.subscriber._make([sId,addr,topic])
+		self.subscribers.append(subscriber)
 		print 'list of all registered subscribers: ',self.subscribers
+		sendHistory(subscriber)
 
 
 
@@ -125,6 +127,11 @@ class EventServer:
 			self.publish(evnt)
 		
 		return event
+
+	def sendHistory(self, subscriber):
+		# TODO-KEVIN add code here to publish events from history when a subscriber joins
+		# based on subscriber.topic
+		pass
 
 	def start(self):
 		# multithreaded??

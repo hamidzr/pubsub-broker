@@ -1,5 +1,5 @@
 DONE # set publishers instances (p1,p2,..)  to get topic and OS as an argument ( for scripting purposes )
-IN PROGRESS # subscriber's register mechanism
+DONE # subscriber's register mechanism
 DONE # generate / decide network topology for mininet. ( to test and showcase our code )
 	# add a logging feature to be able to see outputs ( for when we run it in mininet ) 
 # we should assume that publishers might fail and prepare for it. implement heartbeat
