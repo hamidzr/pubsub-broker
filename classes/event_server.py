@@ -5,7 +5,7 @@ class EventServer:
 	# attribiutes
 
 	context = zmq.Context()
-	pullSocket = context.socket(zmq.PULL)
+	pullSocket = context.socket(zmq.PULL) # for connecting publishers
 	pubSocket = context.socket(zmq.PUB)
 	history=[]
 	
@@ -89,6 +89,7 @@ class EventServer:
 
 	def start(self):
 		# multithreaded??
+		print 'event server started'
 		while True:
 			# if the message is an event
 			event = self.detectMsgType()
