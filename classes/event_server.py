@@ -33,7 +33,7 @@ class EventServer:
 		else:
 			# check if it's a good source. check against a good 'set' of publishers
 			if publisherId in self.dominantPublishersSet:
-				return self.getEvent(msg)
+				self.store(self.getEvent(msg))
 			else:
 				print('discarded a weak event')
 
@@ -90,21 +90,20 @@ class EventServer:
 		print 'list of all registered publishers: ',self.publishers
 
 
-		eventTemp=self.store(self.getEvent(msg))
-		for evnt in self.history[eventTemp.topic] :
-			self.publish(evnt)
+		self.store(self.getEvent(msg))
 
 	def store(self,event):
 		if event.topic in self.history:
-			if self.history[event.topic].count <=10 :
+			if len(self.history[event.topic]) <=10 :
+				print 'Entered '
 				self.history[event.topic].append(event)
 			else :
-				self.history[event.topic].pop()
+				self.history[event.topic].popleft()
 				self.history[event.topic].append(event)
 		else :
 			queue=collections.deque([event])
 			self.history[event.topic]=queue
-
+		print 'number of history message ', len(self.history[event.topic])
 		for evnt in self.history[event.topic] :
 			self.publish(evnt)
 		
@@ -114,8 +113,5 @@ class EventServer:
 		# multithreaded??
 		while True:
 			# if the message is an event
-			event = self.detectMsgType()
-			if event:
-				# event = self.getEvent()
-				self.store(event)
-				self.publish(event)
+			self.detectMsgType()
+			
