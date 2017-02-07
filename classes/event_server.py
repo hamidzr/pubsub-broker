@@ -1,13 +1,14 @@
 import zmq
 import collections
+
 from classes.event import *
 class EventServer:
 	# attribiutes
 
 	context = zmq.Context()
-	pullSocket = context.socket(zmq.PULL) # for connecting publishers
+	pullSocket = context.socket(zmq.PULL)
 	pubSocket = context.socket(zmq.PUB)
-	history=[]
+	history={}  #History is a dictionary that mapping from topic name to deque
 	
 	# a set of current best publisher IDs
 	publisher=collections.namedtuple('publisher', 'pId addr topic os') # TODO generate a python set of dominant publisher IDs
@@ -38,7 +39,11 @@ class EventServer:
 
 	def getEvent(self,string):
 		event = Event.deSerialize(string)
-		print('received event: ', event.serialize());
+		#try not to print here
+		#print('received event: ', event.serialize());
+		
+		
+		
 		return event
 
 	def publish(self, event):
@@ -84,12 +89,29 @@ class EventServer:
 		print 'current dominant publishers set: ',self.dominantPublishersSet
 		print 'list of all registered publishers: ',self.publishers
 
+
+		eventTemp=self.store(self.getEvent(msg))
+		for evnt in self.history[eventTemp.topic] :
+			self.publish(evnt)
+
 	def store(self,event):
-		self.history.append(event)
+		if event.topic in self.history:
+			if self.history[event.topic].count <=10 :
+				self.history[event.topic].append(event)
+			else :
+				self.history[event.topic].pop()
+				self.history[event.topic].append(event)
+		else :
+			queue=collections.deque([event])
+			self.history[event.topic]=queue
+
+		for evnt in self.history[event.topic] :
+			self.publish(evnt)
+		
+		return event
 
 	def start(self):
 		# multithreaded??
-		print 'event server started'
 		while True:
 			# if the message is an event
 			event = self.detectMsgType()
