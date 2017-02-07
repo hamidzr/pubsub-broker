@@ -31,6 +31,7 @@ class EventServer:
 
 		# check if message is a register req
 		if msgType == 'rp':
+			print 'publisher registeration req received'
 			self.handlePublisherRegistration(Id,msg)
 			return False
 		elif msgType == 'rs':
@@ -99,7 +100,14 @@ class EventServer:
 		self.store(self.getEvent(msg))
 
 	def handleSubscriberRegistration(self,sId,msg):
-		pass
+		print msg
+		msgArr = msg.split(', ')
+		addr = msgArr[0]
+		topic = msgArr[1]
+		self.subscribers.append(self.subscriber._make([sId,addr,topic]))
+		print 'list of all registered subscribers: ',self.subscribers
+
+
 
 	def store(self,event):
 		if event.topic in self.history:

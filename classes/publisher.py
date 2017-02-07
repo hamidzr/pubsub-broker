@@ -14,7 +14,7 @@ class Publisher:
     # constructor
 	def __init__(self, esAddr, strength ,topic):
 		# self.data = []
-		self.socket.connect("tcp://" + esAddr)
+		self.socket.connect("tcp://" + esAddr+ ":5555")
 		self.topic = topic
 		self.strength = strength
 
