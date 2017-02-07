@@ -58,6 +58,6 @@ for host in subscribers:
 	subscriber = net.get(host)
 	topic = random.sample(topics,1)
 	print 'starting subscriber with topic {}'.format(topic)
-	subscriber.cmd("python {}/s1.py > log/{}.log &".format(proj_path,host))
+	subscriber.cmd("python {}/s1.py {} > log/{}.log &".format(proj_path,topic,host))
 
 CLI (net)
