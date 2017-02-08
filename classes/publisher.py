@@ -14,15 +14,15 @@ class Publisher:
     # constructor
 	def __init__(self, esAddr, strength ,topic):
 		# self.data = []
-		self.socket.connect("tcp://" + esAddr)
+		self.socket.connect("tcp://" + esAddr+ ":5555")
 		self.topic = topic
 		self.strength = strength
 
 	def register(self):
 
-		self.socket.send_string("r{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
+		self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
 
 	
 	def publish(self, event):
-		self.socket.send_string("e{}-{}".format(self.pId, event.serialize()))
+		self.socket.send_string("ev{}-{}".format(self.pId, event.serialize()))
 		print('published: ' + event.serialize())
