@@ -8,8 +8,8 @@ import time
 if len(sys.argv) == 4:
 	# set the variables from the arguments passed	
 	eventserver_address = sys.argv[1]
-	owner_strength = sys.argv[2]
-	topic = sys.argv[3]
+	topic = sys.argv[2]
+	owner_strength = sys.argv[3]
 else:
 	print 'no arguments provided, resorting to defaults'
 	eventserver_address = '127.0.0.1'

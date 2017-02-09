@@ -17,7 +17,8 @@ class heartbeatClient (threading.Thread):
 	def run(self):
 		print 'we are alive'
 		while True:
-			self.socket.send(b"hi")
+			self.socket.send(b"{}".format(self.pId))
 			ack = self.socket.recv()
+			print ack
 			time.sleep(5)	
 		print 'heartbeating stopped'
