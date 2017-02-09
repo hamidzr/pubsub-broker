@@ -42,6 +42,7 @@ class EventServer:
 			# if you reach here it must be an event from a publisher
 			if Id in self.dominantPublishersSet:
 				self.store(self.getEvent(msg))
+				self.publish(self.getEvent(msg))
 			else:
 				print('discarded a weak event')
 
@@ -63,14 +64,14 @@ class EventServer:
 		msgArr = msg.split(', ')
 		#self.publishers.append({'pId': pId, 'addr':msgArr[0],'topic':msgArr[1], 'os':msgArr[2]})
 		toAppend =False #reminder for whether register this publisher
-		print '!!!!!!!!!!!!! Entered the function'
+		#print '!!!!!!!!!!!!! Entered the function'
 		# store the publisher in a publishers array for later use (if a publisher failed)
 		self.publishers.append(self.publisher._make([pId,msgArr[0],msgArr[1],msgArr[2]]))
 		if len(self.dominantPublishers)==0:
 			toAppend=True
-			print '!!!!!!!!!!!!! Nothing in the dps'	
+			#print '!!!!!!!!!!!!! Nothing in the dps'
 		for dp in self.dominantPublishers:
-			print '!!!!!!!!!!!!! Entered the loop'
+			#print '!!!!!!!!!!!!! Entered the loop'
 			if dp.topic is msgArr[1]:  #found the publisher with same topic
 				if dp.os<msgArr[2]: #remove every publisher with lower os
 					self.dominantPublishers.remove(dp)
@@ -84,7 +85,7 @@ class EventServer:
 			else:
 				toAppend=True #since no publisher found, register this new publisher 
 		if toAppend:	#check if need to register this publisher
-			print '!!!!!!!!!!!!! Im gonna append'			
+			#print '!!!!!!!!!!!!! Im gonna append'
 			self.dominantPublishers.append(self.publisher._make([pId,msgArr[0],msgArr[1],msgArr[2]]))
 			self.dominantPublishersSet.add(pId)
 		
@@ -98,6 +99,7 @@ class EventServer:
 		print 'list of all registered publishers: ',self.publishers
 
 		self.store(self.getEvent(msg))
+		self.publish(self.getEvent(msg))
 
 	def handleSubscriberRegistration(self,sId,msg):
 		print msg
@@ -107,7 +109,7 @@ class EventServer:
 		subscriber = self.subscriber._make([sId,addr,topic])
 		self.subscribers.append(subscriber)
 		print 'list of all registered subscribers: ',self.subscribers
-		sendHistory(subscriber)
+		self.sendHistory(subscriber)
 
 
 
@@ -123,15 +125,16 @@ class EventServer:
 			queue=collections.deque([event])
 			self.history[event.topic]=queue
 		print 'number of history message ', len(self.history[event.topic])
-		for evnt in self.history[event.topic] :
-			self.publish(evnt)
+		#for evnt in self.history[event.topic] :
+		#	self.publish(evnt)
 		
 		return event
 
 	def sendHistory(self, subscriber):
 		# TODO-KEVIN add code here to publish events from history when a subscriber joins
 		# based on subscriber.topic
-		pass
+		for evnt in self.history[subscriber.topic] :
+			self.publish(evnt)
 
 	def start(self):
 		# multithreaded??
