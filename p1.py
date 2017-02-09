@@ -1,4 +1,5 @@
 from classes.publisher import *
+from classes.heartbeat_client import *
 from random import randint
 import sys # to get cli args
 import time
@@ -17,6 +18,7 @@ else:
 	topic = 'book'
 
 p1 = Publisher(eventserver_address,owner_strength,topic)
+heartbeat_client = heartbeatClient(p1.pId,p1.esAddr)
 p1.register()
 # keep publishing
 while True:
