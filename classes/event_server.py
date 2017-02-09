@@ -1,7 +1,8 @@
 import zmq
 import collections
-
+from classes.heartbeat_server import *
 from classes.event import *
+
 class EventServer:
 	# attribiutes
 
@@ -138,6 +139,7 @@ class EventServer:
 
 	def start(self):
 		# multithreaded??
+		heartbeatServer().start()
 		while True:
 			# if the message is an event
 			self.detectMsgType()

@@ -1,5 +1,6 @@
 import zmq
 from classes.event import *
+from classes.heartbeat_client import *
 from random import randint
 
 # assumptions:
@@ -14,12 +15,13 @@ class Publisher:
     # constructor
 	def __init__(self, esAddr, strength ,topic):
 		# self.data = []
+		self.esAddr = esAddr
 		self.socket.connect("tcp://" + esAddr+ ":5555")
 		self.topic = topic
 		self.strength = strength
 
 	def register(self):
-
+		heartbeatClient(self.pId,self.esAddr).start()
 		self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
 
 	
