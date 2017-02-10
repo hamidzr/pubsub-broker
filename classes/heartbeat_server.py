@@ -26,7 +26,7 @@ class heartbeatServer (threading.Thread):
 			for dClient in deadClientsArr:
 				# TODO remove from dominant publishers and history
 				# CALL undergister method
-				self.eventServer.dominantPublishersSet.discard(dClient)
+				self.eventServer.unregisterPublisher(dClient)
 
 		print 'heartbeat server done'
 

@@ -68,6 +68,7 @@ class EventServer:
 		# store the publisher in a publishers array for later use (if a publisher failed)
 		publisher = self.publisher._make([pId,msgArr[0],msgArr[1],msgArr[2]])
 		self.publishers.append(publisher)
+
 		if len(self.dominantPublishers)==0:
 			toAppend=True
 			#print '!!!!!!!!!!!!! Nothing in the dps'
@@ -92,7 +93,7 @@ class EventServer:
 		
 		print 'Number of elem in PDS', len(self.dominantPublishers)
 		print 'publisher registr request', pId, msg
-		print 'current dominantpublishers array: '
+		print 'current dominantPublishers array: '
 		for p in self.dominantPublishers:
 			print 'pId %s , address %s , topic %s , strength %s' % p
 		print 'current dominant publishers: ',self.dominantPublishers
@@ -113,6 +114,33 @@ class EventServer:
 		self.sendHistory(subscriber)
 
 
+	def unregisterPublisher(self, pId):
+		#grab the publisher
+		publisher = ''
+		for pub in self.publishers:
+			if pub.pId == pId:
+				publisher = pub
+				break;
+			else:
+				return False;
+		self.publishers.remove(publisher)
+		# fix will crash if it was not dominant
+		if publisher.pId in self.dominantPublishersSet:
+			self.dominantPublishers.remove(publisher)
+			self.dominantPublishersSet.remove(publisher.pId)
+			self.calcDominantPublisher(publisher.topic)
+		print self.dominantPublishersSet
+
+
+	def calcDominantPublisher(self,topic):
+		dominantPublisher = self.publisher._make([127,'addr',topic,-1])
+		for pub in self.publishers:
+			if pub.topic == topic and pub.os > dominantPublisher.os:
+				dominantPublisher = pub
+		print 'new dominantPublisher to add is '
+		print dominantPublisher
+		self.dominantPublishers.append(dominantPublisher)
+		self.dominantPublishersSet.add(dominantPublisher.pId)
 
 	def store(self,event):
 		if event.topic in self.history:
