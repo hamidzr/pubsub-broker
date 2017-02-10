@@ -18,10 +18,14 @@ s1 = Subscriber(esAddr)
 s1.register(topic)
 s1.subscribe(topic)
 
-logging.basicConfig(filename='subscribeLog.log',level=logging.DEBUG)
+
+logger = logging.getLogger('subscribeLog')
+hdlr = logging.FileHandler('subscribeLog.log',mode='w')
+logger.addHandler(hdlr) 
+logger.setLevel(logging.INFO)
 
 while True:
 	event = Event.deSerialize(s1.socket.recv_string())
-	logging.info(event.serialize())
-	logging.info(str(datetime.datetime.now().time()))
+	logger.info(event.serialize())
+	logger.info(str(datetime.datetime.now().time()))
 	print('recieved: '+ event.topic)
