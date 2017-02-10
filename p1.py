@@ -1,8 +1,8 @@
 from classes.publisher import *
 from random import randint
 import sys # to get cli args
-import time
-
+import datetime
+import logging
 #create a publisher and pass in intial configuration
 
 if len(sys.argv) == 4:
@@ -16,6 +16,8 @@ else:
 	owner_strength = 1
 	topic = 'book'
 
+logging.basicConfig(filename='publishLog.log',level=logging.DEBUG)
+
 p1 = Publisher(eventserver_address,owner_strength,topic)
 p1.register()
 # keep publishing
@@ -23,5 +25,7 @@ while True:
 	body = "body {}".format(randint(0,9))
 	e1 = Event(p1.topic,body)
 	p1.publish(e1)
+	logging.info(e1.serialize())
+	logging.info(str(datetime.datetime.now().time()))
 	# sleep for 300ms
 	time.sleep(2)

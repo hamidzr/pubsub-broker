@@ -161,8 +161,13 @@ class EventServer:
 		# TODO-KEVIN add code here to publish events from history when a subscriber joins
 		# based on subscriber.topic
 		print 'sending history'
-		for evnt in self.history[subscriber.topic] :
-			self.publish(evnt)
+		if subscriber.topic in self.history :
+		
+			for evnt in ls :
+				print(evnt.serialize())	
+		else :
+			print ("no history found")		
+#self.publish(evnt)
 
 	def start(self):
 		# multithreaded??
