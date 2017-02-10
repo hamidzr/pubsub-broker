@@ -13,7 +13,7 @@ if not os.path.exists('log'):
 
 # set options
 proj_path = os.path.abspath('../')
-es_address = '10.0.0.1:5555'
+es_address = '10.0.0.1'
 num_hosts = 10
 
 
@@ -51,13 +51,13 @@ for host in publishers:
 	owner_strength = randint(1,3)
 	topic = random.sample(topics,1)
 	print 'starting publisher with topic {}, os {}'.format(topic,owner_strength)
-	publisher.cmd("python {}/p1.py {} {} {} > log/{}.log &".format(proj_path,es_address,owner_strength,topic,host))
+	publisher.cmd("python {}/p1.py {} {} {} &".format(proj_path,es_address,topic,owner_strength))
 
 print 'instructing subscribers'
 for host in subscribers:
 	subscriber = net.get(host)
 	topic = random.sample(topics,1)
 	print 'starting subscriber with topic {}'.format(topic)
-	subscriber.cmd("python {}/s1.py {} > log/{}.log &".format(proj_path,topic,host))
+	subscriber.cmd("python {}/s1.py {} {} &".format(proj_path,es_address,topic))
 
 CLI (net)

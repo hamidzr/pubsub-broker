@@ -6,7 +6,7 @@ if len(sys.argv) == 3:
 	esAddr = sys.argv[1]
 	topic = sys.argv[2]
 else:
-	print 'no arguments provided, resorting to defaults'
+	logging.debug( 'no arguments provided, resorting to defaults')
 	esAddr = '127.0.0.1'
 	topic = 'unknown'
 
@@ -18,4 +18,4 @@ s1.register(topic)
 s1.subscribe(topic)
 while True:
 	event = Event.deSerialize(s1.socket.recv_string())
-	print('recieved: '+ event.topic)
+	logging.debug('recieved: '+ event.topic)

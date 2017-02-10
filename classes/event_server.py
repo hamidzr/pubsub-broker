@@ -2,10 +2,15 @@ import zmq
 import collections
 from classes.heartbeat_server import *
 from classes.event import *
+import logging
+import commands
 
 class EventServer:
 	# attribiutes
-
+	
+	# current host's ip address
+	addr = str(randint(10000,9999))
+	# addr = commands.getstatusoutput("ifconfig | awk '/inet addr/{print substr($2,6)}' | sed -n '1p'")[1]
 	context = zmq.Context()
 	pullSocket = context.socket(zmq.PULL)
 	pubSocket = context.socket(zmq.PUB)
@@ -23,6 +28,7 @@ class EventServer:
 	def __init__(self):
 		self.pullSocket.bind("tcp://*:5555")
 		self.pubSocket.bind("tcp://*:6666")
+		logging.basicConfig(filename="log/{}.log".format('ES' + self.addr),level=logging.DEBUG)
 
 	def detectMsgType(self):
 		string = self.pullSocket.recv()
@@ -58,7 +64,7 @@ class EventServer:
 
 	def publish(self, event):
 		self.pubSocket.send_string(event.serialize())
-		print('published: ' + event.serialize())
+		logging.debug('published: ' + event.serialize())
 
 	def handlePublisherRegistration(self,pId,msg):
 		# currently handles publisher registration
@@ -91,26 +97,26 @@ class EventServer:
 			self.dominantPublishers.append(publisher)
 			self.dominantPublishersSet.add(pId)
 		
-		print 'Number of elem in PDS', len(self.dominantPublishers)
-		print 'publisher registr request', pId, msg
-		print 'current dominantPublishers array: '
-		for p in self.dominantPublishers:
-			print 'pId %s , address %s , topic %s , strength %s' % p
-		print 'current dominant publishers: ',self.dominantPublishers
-		print 'current dominant publishers set: ',self.dominantPublishersSet
-		print 'list of all registered publishers: ',self.publishers
+		# logging.debug( 'Number of elem in PDS', len(self.dominantPublishers))
+		# logging.debug( 'publisher registr request', pId, msg)
+		# logging.debug( 'current dominantPublishers array: ')
+		# for p in self.dominantPublishers:
+		# 	logging.debug( 'pId %s , address %s , topic %s , strength %s' % p)
+		# logging.debug( 'current dominant publishers: ',self.dominantPublishers)
+		# logging.debug( 'current dominant publishers set: ',self.dominantPublishersSet)
+		# logging.debug( 'list of all registered publishers: ',self.publishers)
 
 		self.store(self.getEvent(msg))
 		self.publish(self.getEvent(msg))
 
 	def handleSubscriberRegistration(self,sId,msg):
-		print msg
+		logging.debug( msg)
 		msgArr = msg.split(', ')
 		addr = msgArr[0]
 		topic = msgArr[1]
 		subscriber = self.subscriber._make([sId,addr,topic])
 		self.subscribers.append(subscriber)
-		print 'list of all registered subscribers: ',self.subscribers
+		logging.debug( 'list of all registered subscribers: ',self.subscribers)
 		self.sendHistory(subscriber)
 
 
@@ -129,7 +135,7 @@ class EventServer:
 			self.dominantPublishers.remove(publisher)
 			self.dominantPublishersSet.remove(publisher.pId)
 			self.calcDominantPublisher(publisher.topic)
-		print self.dominantPublishersSet
+		logging.debug( self.dominantPublishersSet)
 
 
 	def calcDominantPublisher(self,topic):
@@ -137,8 +143,8 @@ class EventServer:
 		for pub in self.publishers:
 			if pub.topic == topic and pub.os > dominantPublisher.os:
 				dominantPublisher = pub
-		print 'new dominantPublisher to add is '
-		print dominantPublisher
+		logging.debug( 'new dominantPublisher to add is ')
+		logging.debug( dominantPublisher)
 		self.dominantPublishers.append(dominantPublisher)
 		self.dominantPublishersSet.add(dominantPublisher.pId)
 
@@ -160,7 +166,7 @@ class EventServer:
 	def sendHistory(self, subscriber):
 		# TODO-KEVIN add code here to publish events from history when a subscriber joins
 		# based on subscriber.topic
-		print 'sending history'
+		logging.debug( 'sending history')
 		for evnt in self.history[subscriber.topic] :
 			self.publish(evnt)
 

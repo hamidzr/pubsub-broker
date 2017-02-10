@@ -2,12 +2,14 @@ import zmq
 from classes.event import *
 from classes.heartbeat_client import *
 from random import randint
+import logging
 
 # assumptions:
 # 	only one topic per publisher
 class Publisher:
 	# attribiutes
-	addr = randint(1000,9999)
+	addr = str(randint(10000,9999))
+	# addr = commands.getstatusoutput("ifconfig | awk '/inet addr/{print substr($2,6)}' | sed -n '1p'")[1]
 	pId = randint(0,999)
 	context = zmq.Context()
 	socket = context.socket(zmq.PUSH)
@@ -19,6 +21,7 @@ class Publisher:
 		self.socket.connect("tcp://" + esAddr+ ":5555")
 		self.topic = topic
 		self.strength = strength
+		# logging.basicConfig(filename="log/{}.log".format('P' + self.addr),level=logging.DEBUG)
 
 	def register(self):
 		heartbeatClient(self.pId,self.esAddr).start()

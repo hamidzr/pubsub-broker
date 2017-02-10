@@ -11,7 +11,7 @@ if len(sys.argv) == 4:
 	topic = sys.argv[2]
 	owner_strength = sys.argv[3]
 else:
-	print 'no arguments provided, resorting to defaults'
+	logging.debug( 'no arguments provided, resorting to defaults')
 	eventserver_address = '127.0.0.1'
 	owner_strength = 1
 	topic = 'book'

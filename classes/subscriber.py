@@ -1,10 +1,12 @@
 import zmq
 from random import randint
+import logging
 
 class Subscriber:
 	# attribiutes
 	sId = randint(0,999)
-	addr = randint(1000,9999)
+	addr = str(randint(10000,9999))
+	# addr = commands.getstatusoutput("ifconfig | awk '/inet addr/{print substr($2,6)}' | sed -n '1p'")[1]
 	context = zmq.Context()
 	socket = context.socket(zmq.SUB)
 	regSocket = context.socket(zmq.PUSH)
@@ -15,7 +17,8 @@ class Subscriber:
 		# self.data = []
 		self.socket.connect("tcp://" + esAddr + ":6666")
 		self.regSocket.connect("tcp://" + esAddr + ":5555")
-		
+		# logging.basicConfig(filename="log/{}.log".format('S' + self.addr),level=logging.DEBUG)
+	
 	def register(self,topic):
 		pass
 		# TODO : SEND AN ID LIKE PUBLISHER
