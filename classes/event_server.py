@@ -164,7 +164,7 @@ class EventServer:
 		if subscriber.topic in self.history :
 			ls= list(self.history[subscriber.topic])
 			for evnt in ls :
-				print(evnt.serialize())	
+				self.publish(evnt)	
 		else :
 			print ("no history found")		
 #self.publish(evnt)
