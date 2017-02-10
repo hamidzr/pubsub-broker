@@ -9,7 +9,7 @@ if len(sys.argv) == 3:
 else:
 	print 'no arguments provided, resorting to defaults'
 	esAddr = '127.0.0.1'
-	topic = 'unknown'
+	topic = 'book'
 
 #create a subscriber
 s1 = Subscriber(esAddr)

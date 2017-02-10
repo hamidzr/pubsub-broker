@@ -162,7 +162,7 @@ class EventServer:
 		# based on subscriber.topic
 		print 'sending history'
 		if subscriber.topic in self.history :
-		
+			ls= list(self.history[subscriber.topic])
 			for evnt in ls :
 				print(evnt.serialize())	
 		else :
