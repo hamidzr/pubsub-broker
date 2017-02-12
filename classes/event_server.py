@@ -3,13 +3,20 @@ import collections
 from classes.heartbeat_server import *
 from classes.event import *
 import logging
+from random import randint
 import commands
+
+logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(filename="log/{}.log".format('ES' + self.addr),level=logger.info)
+logger = logging.getLogger(__name__) #Q will this make it shared between all objects?
+hdlr = logging.FileHandler('eventServer.log',mode='w')
+logger.addHandler(hdlr)
 
 class EventServer:
 	# attribiutes
 	
 	# current host's ip address
-	addr = str(randint(10000,9999))
+	addr = str(randint(1000,9999))
 	# addr = commands.getstatusoutput("ifconfig | awk '/inet addr/{print substr($2,6)}' | sed -n '1p'")[1]
 	context = zmq.Context()
 	pullSocket = context.socket(zmq.PULL)
@@ -28,8 +35,10 @@ class EventServer:
 	def __init__(self):
 		self.pullSocket.bind("tcp://*:5555")
 		self.pubSocket.bind("tcp://*:6666")
-		logging.basicConfig(filename="log/{}.log".format('ES' + self.addr),level=logging.DEBUG)
 
+
+	# handles different message types
+	# will return and even if the message is and event else will return false
 	def detectMsgType(self):
 		string = self.pullSocket.recv()
 		msgType = string[0:2]
@@ -38,7 +47,7 @@ class EventServer:
 
 		# check if message is a register req
 		if msgType == 'rp':
-			print 'publisher registeration req received'
+			logger.info('publisher registeration req received')
 			self.handlePublisherRegistration(Id,msg)
 			return False
 		elif msgType == 'rs':
@@ -48,23 +57,20 @@ class EventServer:
 			# check if it's a good source. check against a good 'set' of publishers
 			# if you reach here it must be an event from a publisher
 			if Id in self.dominantPublishersSet:
-				self.store(self.getEvent(msg))
-				self.publish(self.getEvent(msg))
+				return self.getEvent(msg)
 			else:
-				print('discarded a weak event')
+				logger.info('discarded a weak event')
+				return False
 
 	def getEvent(self,string):
 		event = Event.deSerialize(string)
 		#try not to print here
 		#print('received event: ', event.serialize());
-		
-		
-		
 		return event
 
 	def publish(self, event):
 		self.pubSocket.send_string(event.serialize())
-		logging.debug('published: ' + event.serialize())
+		logger.info('published: ' + event.serialize())
 
 	def handlePublisherRegistration(self,pId,msg):
 		# currently handles publisher registration
@@ -93,30 +99,20 @@ class EventServer:
 			else:
 				toAppend=True #since no publisher found, register this new publisher 
 		if toAppend:	#check if need to register this publisher
-			#print '!!!!!!!!!!!!! Im gonna append'
 			self.dominantPublishers.append(publisher)
 			self.dominantPublishersSet.add(pId)
-		
-		# logging.debug( 'Number of elem in PDS', len(self.dominantPublishers))
-		# logging.debug( 'publisher registr request', pId, msg)
-		# logging.debug( 'current dominantPublishers array: ')
-		# for p in self.dominantPublishers:
-		# 	logging.debug( 'pId %s , address %s , topic %s , strength %s' % p)
-		# logging.debug( 'current dominant publishers: ',self.dominantPublishers)
-		# logging.debug( 'current dominant publishers set: ',self.dominantPublishersSet)
-		# logging.debug( 'list of all registered publishers: ',self.publishers)
 
 		self.store(self.getEvent(msg))
 		self.publish(self.getEvent(msg))
 
 	def handleSubscriberRegistration(self,sId,msg):
-		logging.debug( msg)
+		logger.info( msg)
 		msgArr = msg.split(', ')
 		addr = msgArr[0]
 		topic = msgArr[1]
 		subscriber = self.subscriber._make([sId,addr,topic])
 		self.subscribers.append(subscriber)
-		logging.debug( 'list of all registered subscribers: ',self.subscribers)
+		logger.info( 'list of all registered subscribers: ',self.subscribers)
 		self.sendHistory(subscriber)
 
 
@@ -130,12 +126,12 @@ class EventServer:
 			else:
 				return False;
 		self.publishers.remove(publisher)
-		# fix will crash if it was not dominant
+		# if it was a dominantPublisher we need to do more stuff
 		if publisher.pId in self.dominantPublishersSet:
 			self.dominantPublishers.remove(publisher)
 			self.dominantPublishersSet.remove(publisher.pId)
 			self.calcDominantPublisher(publisher.topic)
-		logging.debug( self.dominantPublishersSet)
+		logger.info( self.dominantPublishersSet)
 
 
 	def calcDominantPublisher(self,topic):
@@ -143,8 +139,8 @@ class EventServer:
 		for pub in self.publishers:
 			if pub.topic == topic and pub.os > dominantPublisher.os:
 				dominantPublisher = pub
-		logging.debug( 'new dominantPublisher to add is ')
-		logging.debug( dominantPublisher)
+		logger.info( 'new dominantPublisher to add is ')
+		logger.info( dominantPublisher)
 		self.dominantPublishers.append(dominantPublisher)
 		self.dominantPublishersSet.add(dominantPublisher.pId)
 
@@ -164,23 +160,24 @@ class EventServer:
 		return event
 
 	def sendHistory(self, subscriber):
-		# TODO-KEVIN add code here to publish events from history when a subscriber joins
-		# based on subscriber.topic
+		# publish events from history based on a new subscriber.topic
 		
-		print 'sending history'
+		logger.info('sending history')
 		if subscriber.topic in self.history :
 			ls= list(self.history[subscriber.topic])
 			for evnt in ls :
 				self.publish(evnt)	
 		else :
-			print ("no history found")		
+			logger.info ("no history found")		
 
 
 	def start(self):
-		# multithreaded??
 		heartbeatServer(self).start()
+		logger.info('started')
 		while True:
 			# if the message is an event
-			self.detectMsgType()
-			# TODO we dont want to put everythin in detectMsgType()
+			event = self.detectMsgType()
+			if (event): 
+				self.store(event)
+				self.publish(event)
 			

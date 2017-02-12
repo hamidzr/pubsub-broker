@@ -51,13 +51,17 @@ for host in publishers:
 	owner_strength = randint(1,3)
 	topic = random.sample(topics,1)
 	print 'starting publisher with topic {}, os {}'.format(topic,owner_strength)
-	publisher.cmd("python {}/p1.py {} {} {} &".format(proj_path,es_address,topic,owner_strength))
+	command = "python {}/p1.py {} {} {} &".format(proj_path,es_address,topic,owner_strength)
+	print command
+	publisher.cmd(command)
 
 print 'instructing subscribers'
 for host in subscribers:
 	subscriber = net.get(host)
 	topic = random.sample(topics,1)
 	print 'starting subscriber with topic {}'.format(topic)
-	subscriber.cmd("python {}/s1.py {} {} &".format(proj_path,es_address,topic))
+	command = "python {}/s1.py {} {} &".format(proj_path,es_address,topic)
+	print command
+	subscriber.cmd(command)
 
 CLI (net)

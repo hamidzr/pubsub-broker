@@ -1,6 +1,9 @@
 import zmq
 import threading
 import time
+import logging
+
+
 
 class heartbeatClient (threading.Thread):
 
@@ -15,10 +18,15 @@ class heartbeatClient (threading.Thread):
 		self.socket.connect("tcp://" + servAddr+ ":4444")
 
 	def run(self):
-		print 'we are alive'
+		logging.basicConfig(level=logging.INFO)
+		logger = logging.getLogger(__name__) #Q will this make it shared between all objects?
+		hdlr = logging.FileHandler('heartbeatClient.log',mode='w')
+		logger.addHandler(hdlr)
+		
+		logger.info( 'we are alive - heartbeating')
 		while True:
 			self.socket.send(b"{}".format(self.pId))
 			ack = self.socket.recv()
-			print ack
+			logger.info( ack)
 			time.sleep(5)	
-		print 'heartbeating stopped'
+		logger.info( 'heartbeating stopped')

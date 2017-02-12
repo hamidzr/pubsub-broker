@@ -3,6 +3,10 @@ import threading
 import time
 import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__) #Q will this make it shared between all objects?
+hdlr = logging.FileHandler('heartbeatServer.log',mode='w')
+logger.addHandler(hdlr)
 
 class heartbeatServer (threading.Thread):
 
@@ -22,20 +26,20 @@ class heartbeatServer (threading.Thread):
 		while True:
 			client_id = self.socket.recv()
 			self.clients[client_id] = time.time()
-			logging.debug( ' heartbeat received from publisher')
+			logger.info( ' heartbeat received from publisher')
 			self.socket.send(b"ok")
 			deadClientsArr = self.checkDeadClients()	
-			logging.debug(  deadClientsArr		)
+			logger.info(  deadClientsArr		)
 			for dClient in deadClientsArr:
 				# TODO remove from dominant publishers and history
 				# CALL undergister method
 				self.eventServer.unregisterPublisher(dClient)
 
-		logging.debug( 'heartbeat server done')
+		logger.info( 'heartbeat server done')
 
 	def checkDeadClients(self):
-		logging.debug( 'current clients are')
-		logging.debug( self.clients)
+		logger.info( 'current clients are')
+		logger.info( self.clients)
 		current_time = time.time() #aprox
 		deadClients = []
 		# find dead clients
@@ -44,6 +48,6 @@ class heartbeatServer (threading.Thread):
 				deadClients.append(key)
 		
 		for dc in deadClients:
-			logging.warning( "{} is dead".format(dc))
+			logger.warning( "{} is dead".format(dc))
 			self.clients.pop(dc)
 		return deadClients
