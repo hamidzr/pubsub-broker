@@ -1,0 +1,53 @@
+#!/usr/bin/python
+
+"""
+This is a simple example that demonstrates multiple links
+between nodes.
+"""
+
+from mininet.cli import CLI
+from mininet.log import setLogLevel
+from mininet.net import Mininet
+from mininet.topo import Topo
+from mininet.link import TCLink, TCIntf, Link
+
+
+def runMultiLink():
+    "Create and run multiple link network"
+    topo = simpleMultiLinkTopo( n=2 )
+    net = Mininet( topo=topo )
+    net.start()
+    CLI( net )
+    net.stop()
+
+class simpleMultiLinkTopo( Topo ):
+    "Simple topology with multiple links"
+
+    def __init__( self, n, **kwargs ):
+        Topo.__init__( self, **kwargs )
+
+        h1 = self.addHost('h1')
+        h2 = self.addHost('h2')
+        h4 = self.addHost('h4')
+        h5 = self.addHost('h5')
+        h6 = self.addHost('h6')
+        h7 = self.addHost('h7')
+        h3 = self.addHost('h3')
+        h9 = self.addHost('h9')
+        h8 = self.addHost('h8')
+    
+        s1 = self.addSwitch('s1')
+    
+        self.addLink(h5,s1,intf=TCIntf, params1 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0}, params2 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0})
+        self.addLink(h6,s1,intf=TCIntf, params1 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0}, params2 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0})
+        self.addLink(h7,s1,intf=TCIntf, params1 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0}, params2 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0})
+        self.addLink(h9,s1,intf=TCIntf, params1 = { 'bw': 200 , 'delay' : '5ms' , 'loss' : 0}, params2 = { 'bw': 200 , 'delay' : '5ms' , 'loss' : 0})
+        self.addLink(h8,s1,intf=TCIntf, params1 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0}, params2 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0})
+        self.addLink(h3,s1,intf=TCIntf, params1 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0}, params2 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0})
+        self.addLink(h1,s1,intf=TCIntf, params1 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0}, params2 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0})
+        self.addLink(h2,s1,intf=TCIntf, params1 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0}, params2 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0})
+        self.addLink(h4,s1,intf=TCIntf, params1 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0}, params2 = { 'bw': 10 , 'delay' : '5ms' , 'loss' : 0})
+    
+if __name__ == '__main__':
+    setLogLevel( 'info' )
+    runMultiLink()

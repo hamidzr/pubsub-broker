@@ -1,0 +1,11 @@
+h2 python p1.py  &
+h3 python p1.py  &
+
+h1 python es1.py  &
+
+h4 python s1.py  &
+h7 python s1.py  &
+h5 python s1.py  &
+h6 python s1.py  &
+h9 python s1.py  &
+h8 python s1.py  &
