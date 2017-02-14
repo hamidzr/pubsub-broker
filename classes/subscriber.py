@@ -35,4 +35,4 @@ class Subscriber:
 		# any subscriber must use the SUBSCRIBE to set a subscription, i.e., tell the
 		# system what it is interested in
 		self.socket.setsockopt_string(zmq.SUBSCRIBE, sFilter.decode('ascii'))
-		logger.info('subscription request to topic {} sent'.format(sFilter)..decode('ascii'))
+		logger.info('subscription request to topic {} sent'.format(sFilter).decode('ascii'))

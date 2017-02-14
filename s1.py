@@ -26,10 +26,6 @@ logger.setLevel(logging.INFO)
 
 while True:
 	event = Event.deSerialize(s1.socket.recv_string())
-<<<<<<< HEAD
-	logging.debug('recieved: '+ event.topic)
-=======
 	logger.info(event.serialize())
 	logger.info(str(datetime.datetime.now().time()))
 	print('recieved: '+ event.topic)
->>>>>>> bd0ae6be464fe42b5db39e8e387ccaa5b0ccf27d
