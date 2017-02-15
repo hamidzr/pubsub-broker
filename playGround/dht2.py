@@ -2,7 +2,9 @@ import threading
 import time
 import logging
 from hash_ring import *
+import sys
 
+#using hash_ring package
 
 class DataStorage(object):
     """docstring for DataStorage"""
@@ -17,6 +19,8 @@ class DataStorage(object):
     def set(self,key,value):
         self.dic[key] = value
         return key, value + ' successfully added to DataStorage ' + self.name
+    def displayData(self):
+        return self.name + ' ' + self.dic.__str__()
     def get(key):
         return self.dic[key]
 
@@ -36,12 +40,24 @@ ds4.set('jhon','25')
 
 ring = HashRing([ds1, ds2, ds3, ds4]) # pass stringalbe items
 
-topic = 'a'
-print 'topic',topic,'node position', ring.get_node_pos(topic)
-print 'topic',topic,'node ', ring.get_node(topic)
-iterator =  ring.iterate_nodes(topic, True)
-for node in iterator:
-	print node
+# topic = 'a'
+# print 'topic',topic,'node position', ring.get_node_pos(topic)
+# print 'topic',topic,'node ', ring.get_node(topic)
+# iterator =  ring.iterate_nodes(topic, True)
+# for node in iterator:
+# 	print node
+
+name = "hamid"
+age = '24'
+
+# name = sys.argv[1] || "hamid"
+name = sys.argv[1]
+age = sys.argv[2]
+
+selectedDs = ring.get_node(name)
+selectedDs.set(name,age)
+
+print selectedDs.displayData()
 
 # mc = MemcacheRing(['127.0.0.1:11212'])
 # mc.set('hello', 'world')
