@@ -14,7 +14,7 @@ if not os.path.exists('log'):
 # set options
 proj_path = os.path.abspath('../')
 es_address = '10.0.0.1'
-num_hosts = 10
+num_hosts = int(raw_input("input the total number of hosts: "))
 
 
 topics = set(['books','news','compilers','tech','world','sport'])
@@ -38,30 +38,34 @@ for h in range(num_hosts/2):
 print publishers
 print subscribers
 
+commandsFile = open('commands.log','w')
 
 net = Mininet(topo)  # Create the Mininet, start it and try some stuff
 net.start()
 # net.pingAll()
+# 
 es = net.get('es')
 es.cmd("python {}/es1.py > log/es.log &".format(proj_path))
 
 print 'instructing publishers'
 for host in publishers:
-	publisher = net.get(host)
+	# publisher = net.get(host)
 	owner_strength = randint(1,3)
 	topic = random.sample(topics,1)
-	print 'starting publisher with topic {}, os {}'.format(topic,owner_strength)
+	print 'adding publisher command with topic {}, os {}'.format(topic,owner_strength)
 	command = "python {}/p1.py {} {} {} &".format(proj_path,es_address,topic,owner_strength)
-	print command
-	publisher.cmd(command)
+	# publisher.cmd(command)
+	commandsFile.write(host + ' ' + command + "\n")
 
 print 'instructing subscribers'
 for host in subscribers:
-	subscriber = net.get(host)
+	# subscriber = net.get(host)
 	topic = random.sample(topics,1)
-	print 'starting subscriber with topic {}'.format(topic)
+	print 'adding subscribercommand with topic {}'.format(topic)
 	command = "python {}/s1.py {} {} &".format(proj_path,es_address,topic)
-	print command
-	subscriber.cmd(command)
+	# subscriber.cmd(command)
+	commandsFile.write(host + ' ' + command + "\n")
+
+commandsFile.close()
 
 CLI (net)
