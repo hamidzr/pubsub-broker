@@ -24,41 +24,35 @@ class DataStorage(object):
     def get(key):
         return self.dic[key]
 
+# chord task is to keep/generate list like this. in an intelligent way to keep the ring up.
 
-ds1 = DataStorage('ds1')
+ds1 = DataStorage('server1')
 ds1.set('ali','30')
         
-ds2 = DataStorage('ds2')
+ds2 = DataStorage('server2')
 ds2.set('lisa','25')
 
-ds3 = DataStorage('ds3')
+ds3 = DataStorage('server3')
 ds3.set('jack','25')
 
-ds4 = DataStorage('ds4')
+ds4 = DataStorage('server4')
 ds4.set('jhon','25')
 
 
 ring = HashRing([ds1, ds2, ds3, ds4]) # pass stringalbe items
 
+# different ring methods
 # topic = 'a'
 # print 'topic',topic,'node position', ring.get_node_pos(topic)
 # print 'topic',topic,'node ', ring.get_node(topic)
-# iterator =  ring.iterate_nodes(topic, True)
+# iterator =  ring.iterate_nodes(topic)
 # for node in iterator:
 # 	print node
+# selectedDs.set(key,age)
 
-name = "hamid"
-age = '24'
 
-# name = sys.argv[1] || "hamid"
-name = sys.argv[1]
-age = sys.argv[2]
+while True:
+    inp = raw_input("enter a topic: ")
+    selectedDs = ring.get_node(inp)
+    print 'register to ' + selectedDs.name    
 
-selectedDs = ring.get_node(name)
-selectedDs.set(name,age)
-
-print selectedDs.displayData()
-
-# mc = MemcacheRing(['127.0.0.1:11212'])
-# mc.set('hello', 'world')
-# print mc.get('hello')

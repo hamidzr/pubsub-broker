@@ -172,6 +172,7 @@ class EventServer:
 
 	def findRingNode():
 		# TODO  determine the node that the subscriber or publisher should register to
+		# return my address for now
 		pass
 
 	def start(self):
