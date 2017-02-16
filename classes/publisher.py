@@ -29,10 +29,15 @@ class Publisher:
 		self.strength = strength
 
 	def register(self):
+		# TODO address = lookup(self.topic)
 		heartbeatClient(self.pId,self.esAddr).start()
 		self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
 		logger.info('register request sent')
 
+	def lookup(self,key):
+		# TODO call to any known eventservice to findout where it should register.
+		# return: ES address (ip:port)
+		pass
 	
 	def publish(self, event):
 		self.socket.send_string("ev{}-{}".format(self.pId, event.serialize()))

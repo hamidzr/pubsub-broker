@@ -170,6 +170,9 @@ class EventServer:
 		else :
 			logger.info ("no history found")		
 
+	def findRingNode():
+		# TODO  determine the node that the subscriber or publisher should register to
+		pass
 
 	def start(self):
 		heartbeatServer(self).start()

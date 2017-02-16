@@ -26,10 +26,14 @@ class Subscriber:
 		# logging.basicConfig(filename="log/{}.log".format('S' + self.addr),level=logging.DEBUG)
 	
 	def register(self,topic):
-		pass
-		# TODO : SEND AN ID LIKE PUBLISHER
+		# TODO address = lookup(topic)
 		self.regSocket.send_string("rs{}-{}, {}".format(self.sId, self.addr,topic))
 		logger.info( 'register req sent')
+
+	def lookup(self,key):
+		# TODO call to any known eventservice (ring node) to findout where it should register. 
+		# return: ES address (ip:port)
+		pass
 
 	def subscribe(self, sFilter):
 		# any subscriber must use the SUBSCRIBE to set a subscription, i.e., tell the
