@@ -44,8 +44,7 @@ net = Mininet(topo)  # Create the Mininet, start it and try some stuff
 net.start()
 # net.pingAll()
 # 
-es = net.get('es')
-es.cmd("python {}/es1.py > log/es.log &".format(proj_path))
+commandsFile.write('es ' + "python {}/es1.py &".format(proj_path))
 
 print 'instructing publishers'
 for host in publishers:
