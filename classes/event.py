@@ -1,4 +1,5 @@
 import time
+import json
 
 class Event:
 	# attribiutes
@@ -17,9 +18,16 @@ class Event:
 
 	# use json for this task?
 	def serialize(self):
-		return "{0}, {1}, {2}".format(self.topic, self.body, self.createdAt)
+		msg = {'topic':self.topic,'body':self.body,'createdAt':self.createdAt}
+		return msg
+		# return "{0}, {1}, {2}".format(self.topic, self.body, self.createdAt)
+
+	def __str__(self):
+		# just for logging and reporting dont use to send messages
+		return {'topic':self.topic,'body':self.body,'createdAt':self.createdAt}.__str__()
 
 	@staticmethod
-	def deSerialize(string):
-		eventArr = string.split(', ');
-		return Event(eventArr[0],eventArr[1],eventArr[2])
+	def deSerialize(msg):
+		# msg = json.loads(string)
+		# eventArr = string.split(', ');
+		return Event(msg['topic'],msg['body'],msg['createdAt'])

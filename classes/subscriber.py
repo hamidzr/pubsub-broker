@@ -1,3 +1,4 @@
+import json
 import zmq
 from random import randint
 import logging
@@ -27,7 +28,10 @@ class Subscriber:
 	
 	def register(self,topic):
 		# TODO address = lookup(topic)
-		self.regSocket.send_string("rs{}-{}, {}".format(self.sId, self.addr,topic))
+		msg = {'msgType':'subscriberRegisterReq','sId':self.sId,'address':self.addr, 'topic':topic}
+		self.regSocket.send_string(json.dumps(msg))
+
+		# self.regSocket.send_string("rs{}-{}, {}".format(self.sId, self.addr,topic))
 		logger.info( 'register req sent')
 
 	def lookup(self,key):

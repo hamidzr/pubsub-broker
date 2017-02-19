@@ -28,7 +28,7 @@ p1 = Publisher(eventserver_address,owner_strength,topic)
 p1.register()
 # keep publishing
 while True:
-	body = "body {}".format(randint(0,9))
+	body = "{}".format(randint(0,9))
 	e1 = Event(p1.topic,body)
 	p1.publish(e1)
 	# logger.info(e1.serialize())

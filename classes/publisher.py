@@ -3,6 +3,7 @@ from classes.event import *
 from classes.heartbeat_client import *
 from random import randint
 import logging
+import json
 
 # assumptions:
 # 	only one topic per publisher
@@ -16,7 +17,7 @@ class Publisher:
 	# attribiutes
 	addr = str(randint(1000,9999))
 	# addr = commands.getstatusoutput("ifconfig | awk '/inet addr/{print substr($2,6)}' | sed -n '1p'")[1]
-	pId = randint(0,999)
+	pId = str(randint(0,999))
 	context = zmq.Context()
 	socket = context.socket(zmq.PUSH)
 	topic = 'unknown'
@@ -31,14 +32,20 @@ class Publisher:
 	def register(self):
 		# TODO address = lookup(self.topic)
 		heartbeatClient(self.pId,self.esAddr).start()
-		self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
+		msg = {'msgType':'publisherRegisterReq','pId':self.pId,'address':self.addr, 'topic':self.topic,'os':self.strength}
+		self.socket.send_string(json.dumps(msg))
+		# self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
 		logger.info('register request sent')
 
 	def lookup(self,key):
+		msg = {'msgType':'nodeLookup', 'key': key}
+		self.socket.send_string(json.dumps(msg))
 		# TODO call to any known eventservice to findout where it should register.
 		# return: ES address (ip:port)
 		pass
 	
 	def publish(self, event):
-		self.socket.send_string("ev{}-{}".format(self.pId, event.serialize()))
-		logger.info('published: ' + event.serialize())
+		msg = {'msgType':'event','pId':self.pId,'eventDetails': {'topic':event.topic,'body':event.body,'createdAt':event.createdAt}}
+		self.socket.send_string(json.dumps(msg))
+		# self.socket.send_string("ev{}-{}".format(self.pId, event.serialize()))
+		logger.info('published: ' + event.__str__())

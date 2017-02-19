@@ -5,6 +5,7 @@ from classes.event import *
 import logging
 from random import randint
 import commands
+import json
 
 logging.basicConfig(level=logging.INFO)
 # logging.basicConfig(filename="log/{}.log".format('ES' + self.addr),level=logger.info)
@@ -38,54 +39,47 @@ class EventServer:
 
 
 	# handles different message types
-	# will return and even if the message is and event else will return false
+	# will return and event if the message is and event else will return false
 	def detectMsgType(self):
 		string = self.pullSocket.recv()
-		msgType = string[0:2]
-		Id = string[2:].split('-')[0] # OPTIMIZE omg needs improving
-		msg = string[2:].split('-')[1]
+		msg = json.loads(string)
 
 		# check if message is a register req
-		if msgType == 'rp':
-			logger.info('publisher registeration req received')
-			self.handlePublisherRegistration(Id,msg)
+		if msg['msgType'] == 'publisherRegisterReq':
+			self.handlePublisherRegistration(msg)
 			return False
-		elif msgType == 'rs':
-			self.handleSubscriberRegistration(Id,msg)
+		elif msg['msgType'] == 'subscriberRegisterReq':
+			self.handleSubscriberRegistration(msg)
 			return False			
-		else:
+		elif msg['msgType'] == 'event':
 			# check if it's a good source. check against a good 'set' of publishers
-			# if you reach here it must be an event from a publisher
-			if Id in self.dominantPublishersSet:
-				return self.getEvent(msg)
+			if msg['pId'] in self.dominantPublishersSet:
+				return self.getEvent(msg['eventDetails'])
 			else:
-				logger.info('discarded a weak event')
+				logger.info('discarded a weak event from ' + msg['pId'])
 				return False
+		else:
+			logger.warning('SOMETHING BAD HAPPENED ( in message detection )')
 
-	def getEvent(self,string):
-		event = Event.deSerialize(string)
-		#try not to print here
-		#print('received event: ', event.serialize());
-		return event
+	def getEvent(self,event):
+		return Event.deSerialize(event)
 
 	def publish(self, event):
-		self.pubSocket.send_string(event.serialize())
-		logger.info('published: ' + event.serialize())
+		self.pubSocket.send_string(json.dumps(event.serialize()))
+		logger.info('published: ' + event.__str__())
 
-	def handlePublisherRegistration(self,pId,msg):
+	def handlePublisherRegistration(self,msg):
 		# currently handles publisher registration
-		msgArr = msg.split(', ')
-		#self.publishers.append({'pId': pId, 'addr':msgArr[0],'topic':msgArr[1], 'os':msgArr[2]})
+		pId = msg['pId']
+		logger.info('publisher registeration req received')
 		toAppend =False #reminder for whether register this publisher
 		# store the publisher in a publishers array for later use (if a publisher failed)
-		publisher = self.publisher._make([pId,msgArr[0],msgArr[1],msgArr[2]])
+		publisher = self.publisher._make([pId,msg['address'],msg['topic'],msg['os']])
 		self.publishers.append(publisher)
 
 		if len(self.dominantPublishers)==0:
 			toAppend=True
-			#print '!!!!!!!!!!!!! Nothing in the dps'
 		for dp in self.dominantPublishers:
-			#print '!!!!!!!!!!!!! Entered the loop'
 			if dp.topic == publisher.topic:  #found the publisher with same topic
 				if dp.os < publisher.os: #remove every publisher with lower os
 					self.dominantPublishers.remove(dp)
@@ -102,15 +96,12 @@ class EventServer:
 			self.dominantPublishers.append(publisher)
 			self.dominantPublishersSet.add(pId)
 
-		self.store(self.getEvent(msg))
-		self.publish(self.getEvent(msg))
+		# self.store(self.getEvent(msg))
+		# self.publish(self.getEvent(msg))
 
-	def handleSubscriberRegistration(self,sId,msg):
-		logger.info( msg)
-		msgArr = msg.split(', ')
-		addr = msgArr[0]
-		topic = msgArr[1]
-		subscriber = self.subscriber._make([sId,addr,topic])
+	def handleSubscriberRegistration(self,msg):
+		logger.info('publisher registeration req received')
+		subscriber = self.subscriber._make([msg['sId'],msg['address'],msg['topic']])
 		self.subscribers.append(subscriber)
 		logger.info( 'list of all registered subscribers: ',self.subscribers)
 		self.sendHistory(subscriber)
@@ -125,6 +116,7 @@ class EventServer:
 				break;
 			else:
 				return False;
+		logger.info('unregistering publisher ' + publisher.__str__())
 		self.publishers.remove(publisher)
 		# if it was a dominantPublisher we need to do more stuff
 		if publisher.pId in self.dominantPublishersSet:
@@ -157,7 +149,7 @@ class EventServer:
 		#for evnt in self.history[event.topic] :
 		#	self.publish(evnt)
 		
-		return event
+		return event # why returning event?
 
 	def sendHistory(self, subscriber):
 		# publish events from history based on a new subscriber.topic
