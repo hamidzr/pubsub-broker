@@ -69,7 +69,8 @@ class EventServer:
 		return Event.deSerialize(event)
 
 	def publish(self, event):
-		self.pubSocket.send_string(json.dumps(event.serialize()))
+		# TODO make a publishable event method
+		self.pubSocket.send_string("{} {} {}".format(event.topic, event.body, event.createdAt))
 		logger.info('published: ' + event.__str__())
 
 	def handlePublisherRegistration(self,msg):
@@ -106,12 +107,12 @@ class EventServer:
 		# self.publish(self.getEvent(msg))
 
 	def handleSubscriberRegistration(self,msg):
-		logger.info('publisher registeration req received')
+		logger.info('subscriber registeration req received')
 		subscriber = self.subscriber._make([msg['sId'],msg['address'],msg['topic']])
 		self.subscribers.append(subscriber)
-		logger.info( 'list of all registered subscribers: ',self.subscribers)
-		self.sendHistory(subscriber)
+		logger.info( 'list of all registered subscribers: ' + self.subscribers.__str__())
 		self.repSocket.send(b"registred ")
+		self.sendHistory(subscriber)
 
 
 	def unregisterPublisher(self, pId):

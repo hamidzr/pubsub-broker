@@ -16,14 +16,6 @@ else:
 	owner_strength = 1
 	topic = 'book'
 
-#logging.basicConfig(filename='publishLog.log',level=logging.DEBUG, mode='w')
-#filehandler_dbg = logging.FileHandler(logger.name + '-debug.log', mode='w')
-
-# logger = logging.getLogger('publishLog')
-# hdlr = logging.FileHandler('publishLog.log',mode='w')
-# logger.addHandler(hdlr) 
-# logger.setLevel(logging.INFO)
-
 p1 = Publisher(eventserver_address,owner_strength,topic)
 p1.lookup(topic)
 p1.register()
@@ -32,7 +24,5 @@ while True:
 	body = "{}".format(randint(0,9))
 	e1 = Event(p1.topic,body)
 	p1.publish(e1)
-	# logger.info(e1.serialize())
-	# logger.info(str(datetime.datetime.now().time()))
 	# sleep for 2s
 	time.sleep(2)

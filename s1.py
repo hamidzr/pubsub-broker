@@ -15,6 +15,7 @@ else:
 s1 = Subscriber(esAddr)
 # set the variables from the arguments passed
 #subscribe to a topic
+s1.lookup(topic)
 s1.register(topic)
 s1.subscribe(topic)
 
@@ -25,7 +26,9 @@ logger.addHandler(hdlr)
 logger.setLevel(logging.INFO)
 
 while True:
-	event = Event.deSerialize(s1.socket.recv_string())
-	logger.info(event.serialize())
-	logger.info(str(datetime.datetime.now().time()))
-	print('recieved: '+ event.topic)
+	print s1.socket.recv()
+	# msg = json.loads(s1.socket.recv())
+	# event = Event.deSerialize(msg)
+	# logger.info(msg)
+	# # logger.info(str(datetime.datetime.now().time()))
+	# logger.info('recieved: '+ event.topic)

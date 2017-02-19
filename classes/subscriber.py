@@ -16,28 +16,33 @@ class Subscriber:
 	# addr = commands.getstatusoutput("ifconfig | awk '/inet addr/{print substr($2,6)}' | sed -n '1p'")[1]
 	context = zmq.Context()
 	socket = context.socket(zmq.SUB)
-	regSocket = context.socket(zmq.PUSH)
+	reqSocket = context.socket(zmq.REQ)
 
 	
 	# constructor
 	def __init__(self,esAddr = "127.0.0.1"):
 		# self.data = []
 		self.socket.connect("tcp://" + esAddr + ":6666")
-		self.regSocket.connect("tcp://" + esAddr + ":5555")
+		self.reqSocket.connect("tcp://" + esAddr + ":5555")
 		# logging.basicConfig(filename="log/{}.log".format('S' + self.addr),level=logging.DEBUG)
 	
 	def register(self,topic):
 		# TODO address = lookup(topic)
 		msg = {'msgType':'subscriberRegisterReq','sId':self.sId,'address':self.addr, 'topic':topic}
-		self.regSocket.send_string(json.dumps(msg))
-
-		# self.regSocket.send_string("rs{}-{}, {}".format(self.sId, self.addr,topic))
+		self.reqSocket.send_string(json.dumps(msg))
+		self.reqSocket.recv()
+		# self.reqSocket.send_string("rs{}-{}, {}".format(self.sId, self.addr,topic))
 		logger.info( 'register req sent')
 
 	def lookup(self,key):
-		# TODO call to any known eventservice (ring node) to findout where it should register. 
+		# TODO call to any known eventservice to findout where it should register.
 		# return: ES address (ip:port)
-		pass
+		msg = {'msgType':'nodeLookup', 'key': key}
+		self.reqSocket.send_string(json.dumps(msg))
+		designatedServer = self.reqSocket.recv()
+		print('designated server:' , designatedServer)
+		return designatedServer
+		# TODO go register to the designate
 
 	def subscribe(self, sFilter):
 		# any subscriber must use the SUBSCRIBE to set a subscription, i.e., tell the
