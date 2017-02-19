@@ -20,7 +20,7 @@ class EventServer:
 	addr = str(randint(1000,9999))
 	# addr = commands.getstatusoutput("ifconfig | awk '/inet addr/{print substr($2,6)}' | sed -n '1p'")[1]
 	context = zmq.Context()
-	pullSocket = context.socket(zmq.PULL)
+	repSocket = context.socket(zmq.REP)
 	pubSocket = context.socket(zmq.PUB)
 	history={}  #History is a dictionary that mapping from topic name to deque
 	
@@ -34,32 +34,32 @@ class EventServer:
 
 	# constructor
 	def __init__(self):
-		self.pullSocket.bind("tcp://*:5555")
+		self.repSocket.bind("tcp://*:5555")
 		self.pubSocket.bind("tcp://*:6666")
 
 
 	# handles different message types
 	# will return and event if the message is and event else will return false
 	def detectMsgType(self):
-		string = self.pullSocket.recv()
+		string = self.repSocket.recv()
+		self.repSocket.send(b"ok")
 		msg = json.loads(string)
 
 		# check if message is a register req
 		if msg['msgType'] == 'publisherRegisterReq':
 			self.handlePublisherRegistration(msg)
-			return False
 		elif msg['msgType'] == 'subscriberRegisterReq':
 			self.handleSubscriberRegistration(msg)
-			return False			
 		elif msg['msgType'] == 'event':
 			# check if it's a good source. check against a good 'set' of publishers
 			if msg['pId'] in self.dominantPublishersSet:
 				return self.getEvent(msg['eventDetails'])
 			else:
 				logger.info('discarded a weak event from ' + msg['pId'])
-				return False
 		else:
-			logger.warning('SOMETHING BAD HAPPENED ( in message detection )')
+			logger.warning('unknown message type')
+
+		return False
 
 	def getEvent(self,event):
 		return Event.deSerialize(event)

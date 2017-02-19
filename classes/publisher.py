@@ -19,7 +19,7 @@ class Publisher:
 	# addr = commands.getstatusoutput("ifconfig | awk '/inet addr/{print substr($2,6)}' | sed -n '1p'")[1]
 	pId = str(randint(0,999))
 	context = zmq.Context()
-	socket = context.socket(zmq.PUSH)
+	socket = context.socket(zmq.REQ)
 	topic = 'unknown'
     # constructor
 	def __init__(self, esAddr, strength ,topic):
@@ -34,12 +34,14 @@ class Publisher:
 		heartbeatClient(self.pId,self.esAddr).start()
 		msg = {'msgType':'publisherRegisterReq','pId':self.pId,'address':self.addr, 'topic':self.topic,'os':self.strength}
 		self.socket.send_string(json.dumps(msg))
+		self.socket.recv()
 		# self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
 		logger.info('register request sent')
 
 	def lookup(self,key):
 		msg = {'msgType':'nodeLookup', 'key': key}
 		self.socket.send_string(json.dumps(msg))
+		self.socket.recv()
 		# TODO call to any known eventservice to findout where it should register.
 		# return: ES address (ip:port)
 		pass
@@ -47,5 +49,6 @@ class Publisher:
 	def publish(self, event):
 		msg = {'msgType':'event','pId':self.pId,'eventDetails': {'topic':event.topic,'body':event.body,'createdAt':event.createdAt}}
 		self.socket.send_string(json.dumps(msg))
+		self.socket.recv()
 		# self.socket.send_string("ev{}-{}".format(self.pId, event.serialize()))
 		logger.info('published: ' + event.__str__())
