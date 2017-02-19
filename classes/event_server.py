@@ -46,8 +46,6 @@ class EventServer:
 		self.mRingOrganizer = ringOrganizer(self.mHashRing, getRingOrgFromAddress(address));
 		self.mRingOrganizer.nodes.add(address)
 
-
-
 	# handles different message types
 	# will return and event if the message is and event else will return false
 	def detectMsgType(self):
@@ -186,8 +184,33 @@ class EventServer:
 		designatedEs = self.mHashRing.get_node(msg['key'])
 		self.repSocket.send_string(designatedEs)
 
+
+	def joinNotifyNode(self,neighborAddress):
+		# add it to our own nodesTable
+		self.mRingOrganizer.nodes.add(neighborAddress)
+		self.mHashRing.add_node(neighborAddress)
+		# notify the neighbor to add us to it's table
+		msg = {'type': 'nodeJoinReq', 'address':self.addr}
+		#connect to neighborRingOrganizer
+		reqSocket = self.context.socket(zmq.REQ)
+		reqSocket.connect("tcp://"+getRingOrgFromAddress(neighborAddress))
+		reqSocket.send(json.dumps(msg))
+		suggestedNodes = reqSocket.recv()
+		reqSocket.disconnect("tcp://"+getRingOrgFromAddress(neighborAddress))
+		# TODO make this recursive
+		for nodeAddress in suggestedNodes.split(', '):
+			# if I dont know this node
+			if (nodeAddress not in self.mRingOrganizer.nodes):
+				self.mRingOrganizer.nodes.add(nodeAddress)
+				self.mHashRing.add_node(nodeAddress)
+				reqSocket.connect("tcp://"+getRingOrgFromAddress(nodeAddress))
+				reqSocket.send(json.dumps(msg))
+				print('more suggestions: ', reqSocket.recv())
+				reqSocket.disconnect("tcp://"+getRingOrgFromAddress(nodeAddress))
+
 	def start(self):
 		heartbeatServer(self).start()
+		self.mRingOrganizer.start()
 		logger.info('started')
 		while True:
 			# if the message is an event

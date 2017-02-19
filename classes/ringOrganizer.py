@@ -3,6 +3,8 @@ import threading
 from uhashring import HashRing
 import json
 import time
+import logging
+logger = logging.getLogger(__name__)
 
 class ringOrganizer(threading.Thread):
 	"""docstring for ringOrganizer"""
@@ -22,13 +24,13 @@ class ringOrganizer(threading.Thread):
 	def addNode(self,msg):
 		self.hr.add_node(msg['address'])
 		self.nodes.add(msg['address'])
-		print 'node added: ', msg['address']
+		logger.info('node added: ' + msg['address'])
 	
 	def suggestNodes(self):
 		return ', '.join(self.nodes)
 
 	def run(self):
-		print 'ringOrganizer started'
+		logger.info('ringOrganizer started')
 		while True:
 			string = self.repSocket.recv()
 			msg = json.loads(string)
@@ -36,6 +38,9 @@ class ringOrganizer(threading.Thread):
 				self.addNode(msg)
 				suggestions = self.suggestNodes()
 				self.repSocket.send_string(suggestions)
+			else:
+				logger.warning('message type not found')
+				self.repSocket.send_string('bad message')
 
 
 		
