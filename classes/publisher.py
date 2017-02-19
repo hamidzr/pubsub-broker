@@ -22,16 +22,18 @@ class Publisher:
 	socket = context.socket(zmq.REQ)
 	topic = 'unknown'
     # constructor
-	def __init__(self, esAddr, strength ,topic):
+	def __init__(self, knownEsAddress, strength ,topic):
 		# self.data = []
-		self.esAddr = esAddr
-		self.socket.connect("tcp://" + esAddr)
+		self.knownEsAddress = knownEsAddress
+		self.socket.connect("tcp://" + self.knownEsAddress)
 		self.topic = topic
 		self.strength = strength
 
-	def register(self):
+	def register(self,serverAddress):
 		# TODO address = lookup(self.topic)
-		heartbeatClient(self.pId,self.esAddr).start()
+		self.socket.disconnect("tcp://" + self.knownEsAddress)
+		self.socket.connect("tcp://" + serverAddress)
+		heartbeatClient(self.pId,serverAddress).start()
 		msg = {'msgType':'publisherRegisterReq','pId':self.pId,'address':self.addr, 'topic':self.topic,'os':self.strength}
 		self.socket.send_string(json.dumps(msg))
 		self.socket.recv()
@@ -45,6 +47,8 @@ class Publisher:
 		self.socket.send_string(json.dumps(msg))
 		designatedServer = self.socket.recv()
 		print('designated server:' , designatedServer)
+
+		self.register(designatedServer)
 		return designatedServer
 		# TODO go register to the designate
 

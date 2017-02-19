@@ -42,9 +42,9 @@ class EventServer:
 		logger.info('EventServer addr: ' + address)
 		self.repSocket.bind("tcp://"+address)
 		self.pubSocket.bind("tcp://"+getPubFromAddress(address))
-		mHashRing = HashRing(nodes=[address])
-		mRingOrganizer = ringOrganizer(mHashRing, getRingOrgFromAddress(address));
-		mRingOrganizer.nodes.add(address)
+		self.mHashRing = HashRing(nodes=[address])
+		self.mRingOrganizer = ringOrganizer(self.mHashRing, getRingOrgFromAddress(address));
+		self.mRingOrganizer.nodes.add(address)
 
 
 
@@ -183,7 +183,8 @@ class EventServer:
 	def findRingNode(self,msg):
 		# TODO  determine the node that the subscriber or publisher should register to
 		# return my address for now
-		self.repSocket.send_string("127.0.0.1")
+		designatedEs = self.mHashRing.get_node(msg['key'])
+		self.repSocket.send_string(designatedEs)
 
 	def start(self):
 		heartbeatServer(self).start()

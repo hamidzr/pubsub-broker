@@ -18,7 +18,6 @@ else:
 
 p1 = Publisher(eventserver_address,owner_strength,topic)
 p1.lookup(topic)
-p1.register()
 # keep publishing
 while True:
 	body = "{}".format(randint(0,9))

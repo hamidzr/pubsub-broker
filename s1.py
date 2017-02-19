@@ -15,8 +15,8 @@ else:
 s1 = Subscriber(esAddr)
 # set the variables from the arguments passed
 #subscribe to a topic
-s1.lookup(topic)
-s1.register(topic)
+srvAddress = s1.lookup(topic)
+s1.register(topic, srvAddress)
 s1.subscribe(topic)
 
 

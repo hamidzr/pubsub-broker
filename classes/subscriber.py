@@ -23,12 +23,15 @@ class Subscriber:
 	# constructor
 	def __init__(self,esAddr = "127.0.0.1:5555"):
 		# self.data = []
+		self.knownEsAddress = esAddr
 		self.socket.connect("tcp://" + getPubFromAddress(esAddr))
 		self.reqSocket.connect("tcp://" + esAddr)
 		# logging.basicConfig(filename="log/{}.log".format('S' + self.addr),level=logging.DEBUG)
 	
-	def register(self,topic):
+	def register(self,topic, serverAddress):
 		# TODO address = lookup(topic)
+		self.socket.disconnect("tcp://" + getPubFromAddress(self.knownEsAddress))
+		self.socket.connect("tcp://" + serverAddress)
 		msg = {'msgType':'subscriberRegisterReq','sId':self.sId,'address':self.addr, 'topic':topic}
 		self.reqSocket.send_string(json.dumps(msg))
 		self.reqSocket.recv()
