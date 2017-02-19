@@ -22,7 +22,7 @@ class heartbeatServer (threading.Thread):
 		# logging.basicConfig(filename="log/{}hbServer.log".format(self.addr),level=logging.DEBUG)
 
 	def run(self):
-		logging.debug( 'listening for heartbeats')
+		logger.debug( 'listening for heartbeats')
 		while True:
 			client_id = self.socket.recv()
 			self.clients[client_id] = time.time()
