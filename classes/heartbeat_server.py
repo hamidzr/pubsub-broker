@@ -2,6 +2,7 @@ import zmq
 import threading
 import time
 import logging
+from classes.utils import *
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__) #Q will this make it shared between all objects?
@@ -18,7 +19,7 @@ class heartbeatServer (threading.Thread):
 		context = zmq.Context()
 		self.eventServer = eventServer # get a handle on eventServer
 		self.socket = context.socket(zmq.REP)
-		self.socket.bind("tcp://*:4444")
+		self.socket.bind("tcp://" + getHbServerFromAddress(eventServer.addr))
 		# logging.basicConfig(filename="log/{}hbServer.log".format(self.addr),level=logging.DEBUG)
 
 	def run(self):

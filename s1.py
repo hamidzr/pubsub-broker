@@ -26,9 +26,5 @@ logger.addHandler(hdlr)
 logger.setLevel(logging.INFO)
 
 while True:
-	print s1.socket.recv()
-	# msg = json.loads(s1.socket.recv())
-	# event = Event.deSerialize(msg)
-	# logger.info(msg)
-	# # logger.info(str(datetime.datetime.now().time()))
-	# logger.info('recieved: '+ event.topic)
+	msg = s1.socket.recv()
+	logger.info('recieved: '+ msg)

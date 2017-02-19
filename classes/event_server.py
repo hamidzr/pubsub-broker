@@ -2,10 +2,14 @@ import zmq
 import collections
 from classes.heartbeat_server import *
 from classes.event import *
+from classes.utils import *
 import logging
-from random import randint
 import commands
 import json
+from random import randint
+from classes.ringOrganizer import *
+from uhashring import HashRing
+
 
 logging.basicConfig(level=logging.INFO)
 # logging.basicConfig(filename="log/{}.log".format('ES' + self.addr),level=logger.info)
@@ -33,9 +37,15 @@ class EventServer:
 	subscribers=[]
 
 	# constructor
-	def __init__(self):
-		self.repSocket.bind("tcp://*:5555")
-		self.pubSocket.bind("tcp://*:6666")
+	def __init__(self,address):
+		self.addr = address
+		logger.info('EventServer addr: ' + address)
+		self.repSocket.bind("tcp://"+address)
+		self.pubSocket.bind("tcp://"+getPubFromAddress(address))
+		mHashRing = HashRing(nodes=[address])
+		mRingOrganizer = ringOrganizer(mHashRing, getRingOrgFromAddress(address));
+		mRingOrganizer.nodes.add(address)
+
 
 
 	# handles different message types

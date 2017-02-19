@@ -2,6 +2,7 @@ import zmq
 import threading
 import time
 import logging
+from classes.utils import *
 
 
 
@@ -15,7 +16,7 @@ class heartbeatClient (threading.Thread):
 		self.servAddr = servAddr
 		context = zmq.Context()
 		self.socket = context.socket(zmq.REQ)
-		self.socket.connect("tcp://" + servAddr+ ":4444")
+		self.socket.connect("tcp://"+getHbServerFromAddress(servAddr))
 
 	def run(self):
 		logging.basicConfig(level=logging.INFO)

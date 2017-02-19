@@ -2,6 +2,7 @@ import json
 import zmq
 from random import randint
 import logging
+from classes.utils import *
 
 
 logging.basicConfig(level=logging.INFO)
@@ -20,10 +21,10 @@ class Subscriber:
 
 	
 	# constructor
-	def __init__(self,esAddr = "127.0.0.1"):
+	def __init__(self,esAddr = "127.0.0.1:5555"):
 		# self.data = []
-		self.socket.connect("tcp://" + esAddr + ":6666")
-		self.reqSocket.connect("tcp://" + esAddr + ":5555")
+		self.socket.connect("tcp://" + getPubFromAddress(esAddr))
+		self.reqSocket.connect("tcp://" + esAddr)
 		# logging.basicConfig(filename="log/{}.log".format('S' + self.addr),level=logging.DEBUG)
 	
 	def register(self,topic):
