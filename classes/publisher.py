@@ -39,12 +39,16 @@ class Publisher:
 		logger.info('register request sent')
 
 	def lookup(self,key):
-		msg = {'msgType':'nodeLookup', 'key': key}
-		self.socket.send_string(json.dumps(msg))
-		self.socket.recv()
 		# TODO call to any known eventservice to findout where it should register.
 		# return: ES address (ip:port)
-		pass
+		msg = {'msgType':'nodeLookup', 'key': key}
+		self.socket.send_string(json.dumps(msg))
+		designatedServer = self.socket.recv()
+		print('designated server:' , designatedServer)
+		return designatedServer
+		# TODO go register to the designate
+
+
 	
 	def publish(self, event):
 		msg = {'msgType':'event','pId':self.pId,'eventDetails': {'topic':event.topic,'body':event.body,'createdAt':event.createdAt}}

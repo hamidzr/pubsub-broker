@@ -42,15 +42,18 @@ class EventServer:
 	# will return and event if the message is and event else will return false
 	def detectMsgType(self):
 		string = self.repSocket.recv()
-		self.repSocket.send(b"ok")
 		msg = json.loads(string)
 
 		# check if message is a register req
+		# dont forget to reply to the request
 		if msg['msgType'] == 'publisherRegisterReq':
 			self.handlePublisherRegistration(msg)
 		elif msg['msgType'] == 'subscriberRegisterReq':
 			self.handleSubscriberRegistration(msg)
+		elif msg['msgType'] == 'nodeLookup':
+			self.findRingNode(msg)
 		elif msg['msgType'] == 'event':
+			self.repSocket.send(b"ack")
 			# check if it's a good source. check against a good 'set' of publishers
 			if msg['pId'] in self.dominantPublishersSet:
 				return self.getEvent(msg['eventDetails'])
@@ -58,6 +61,7 @@ class EventServer:
 				logger.info('discarded a weak event from ' + msg['pId'])
 		else:
 			logger.warning('unknown message type')
+			self.repSocket.send(b"wrong message type ")
 
 		return False
 
@@ -96,6 +100,8 @@ class EventServer:
 			self.dominantPublishers.append(publisher)
 			self.dominantPublishersSet.add(pId)
 
+		self.repSocket.send(b"registration ")
+
 		# self.store(self.getEvent(msg))
 		# self.publish(self.getEvent(msg))
 
@@ -105,6 +111,7 @@ class EventServer:
 		self.subscribers.append(subscriber)
 		logger.info( 'list of all registered subscribers: ',self.subscribers)
 		self.sendHistory(subscriber)
+		self.repSocket.send(b"registred ")
 
 
 	def unregisterPublisher(self, pId):
@@ -162,10 +169,10 @@ class EventServer:
 		else :
 			logger.info ("no history found")		
 
-	def findRingNode():
+	def findRingNode(self,msg):
 		# TODO  determine the node that the subscriber or publisher should register to
 		# return my address for now
-		pass
+		self.repSocket.send_string("127.0.0.1")
 
 	def start(self):
 		heartbeatServer(self).start()
