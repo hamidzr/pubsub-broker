@@ -1,0 +1,12 @@
+DONE # set publishers instances (p1,p2,..)  to get topic and OS as an argument ( for scripting purposes )
+DONE # subscriber's register mechanism
+DONE # generate / decide network topology for mininet. ( to test and showcase our code )
+	# add a logging feature to be able to see outputs ( for when we run it in mininet ) 
+DONE # we should assume that publishers might fail and prepare for it. implement heartbeat
+DONE # unregister method and recalculation of new dominant publishers
+
+# write a readme for the grader to see
+# Do end-to-end measurements (time between publication and receipt of info; since the clock is the same on all emulated hosts, we do not have the issue of clocks drifting apart from each other).
+DONE # Complete the history container, which is able to hold message of different topic respectively
+
+*take a look at the next assignment.
