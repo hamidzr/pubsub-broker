@@ -17,7 +17,8 @@ else:
 	topic = 'book'
 
 p1 = Publisher(eventserver_address,owner_strength,topic)
-p1.lookup(topic)
+srvAddr = p1.lookup(topic)
+p1.register(srvAddr)
 # keep publishing
 while True:
 	body = "{}".format(randint(0,9))

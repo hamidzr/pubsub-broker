@@ -30,27 +30,20 @@ class Publisher:
 		self.strength = strength
 
 	def register(self,serverAddress):
-		# TODO address = lookup(self.topic)
 		self.socket.disconnect("tcp://" + self.knownEsAddress)
 		self.socket.connect("tcp://" + serverAddress)
 		heartbeatClient(self.pId,serverAddress).start()
 		msg = {'msgType':'publisherRegisterReq','pId':self.pId,'address':self.addr, 'topic':self.topic,'os':self.strength}
 		self.socket.send_string(json.dumps(msg))
 		self.socket.recv()
-		# self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
 		logger.info('register request sent')
 
 	def lookup(self,key):
-		# TODO call to any known eventservice to findout where it should register.
-		# return: ES address (ip:port)
 		msg = {'msgType':'nodeLookup', 'key': key}
 		self.socket.send_string(json.dumps(msg))
 		designatedServer = self.socket.recv()
 		print('designated server:' , designatedServer)
-
-		self.register(designatedServer)
 		return designatedServer
-		# TODO go register to the designate
 
 
 	
