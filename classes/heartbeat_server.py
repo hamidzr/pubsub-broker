@@ -28,7 +28,9 @@ class heartbeatServer (threading.Thread):
 			client_id = self.socket.recv()
 			self.clients[client_id] = time.time()
 			logger.info( ' heartbeat received from publisher')
+			#Kevin edited here to send all nodes' ip to heartbeat_client
 			self.socket.send(b"ok")
+			self.repSocket.send_string(self.eventServer.mRingOrganizer.suggestNodes())
 			deadClientsArr = self.checkDeadClients()	
 			logger.info(  deadClientsArr		)
 			for dClient in deadClientsArr:

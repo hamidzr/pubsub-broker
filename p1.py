@@ -17,7 +17,11 @@ else:
 	topic = 'book'
 
 p1 = Publisher(eventserver_address,owner_strength,topic)
-p1.lookup(topic)
+
+#If not registered successfully, do it again
+registered=p1.lookup(topic)
+while not registered :
+	registered = p1.lookup(topic)
 # keep publishing
 while True:
 	body = "{}".format(randint(0,9))

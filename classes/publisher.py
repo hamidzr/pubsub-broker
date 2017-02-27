@@ -28,17 +28,30 @@ class Publisher:
 		self.socket.connect("tcp://" + self.knownEsAddress)
 		self.topic = topic
 		self.strength = strength
+		self.heartBeatClientObject=heartbeatClient(self.pId,knownEsAddress)
+
+
 
 	def register(self,serverAddress):
 		# TODO address = lookup(self.topic)
 		self.socket.disconnect("tcp://" + self.knownEsAddress)
-		self.socket.connect("tcp://" + serverAddress)
-		heartbeatClient(self.pId,serverAddress).start()
-		msg = {'msgType':'publisherRegisterReq','pId':self.pId,'address':self.addr, 'topic':self.topic,'os':self.strength}
-		self.socket.send_string(json.dumps(msg))
-		self.socket.recv()
-		# self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
-		logger.info('register request sent')
+		self.socket.setsockopt(zmq.RCVTIMEO, 1000)
+		#Check before Register
+		try:
+			self.socket.connect("tcp://" + serverAddress)
+			self.heartBeatClientObject.resetAddress(serverAddress)
+			self.heartBeatClientObject.start()
+			msg = {'msgType':'publisherRegisterReq','pId':self.pId,'address':self.addr, 'topic':self.topic,'os':self.strength}
+			self.socket.send_string(json.dumps(msg))
+			self.socket.recv()
+			# self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
+			logger.info('register request sent')
+			return True
+		except:
+			print ("The node where about to register is dead")
+			return False
+			#TRY TO RE-LOOKUP
+			#NOt Finished
 
 	def lookup(self,key):
 		# TODO call to any known eventservice to findout where it should register.
@@ -47,6 +60,14 @@ class Publisher:
 		self.socket.send_string(json.dumps(msg))
 		designatedServer = self.socket.recv()
 		print('designated server:' , designatedServer)
+
+		#Kevin modified
+		while designatedServer == self.knownEsAddress:
+			#ask another address
+			i=i+1
+			msg = {'msgType': 'nodeLookup', 'key': key+i}
+			self.socket.send_string(json.dumps(msg))
+			self.knownEsAddress = self.socket.recv()
 
 		self.register(designatedServer)
 		return designatedServer
