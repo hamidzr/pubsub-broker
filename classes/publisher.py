@@ -33,8 +33,8 @@ class Publisher:
 
 
 	def register(self,serverAddress):
-		# TODO address = lookup(self.topic)
 		self.socket.disconnect("tcp://" + self.knownEsAddress)
+
 		self.socket.setsockopt(zmq.RCVTIMEO, 1000)
 		#Check before Register
 		try:
@@ -54,8 +54,6 @@ class Publisher:
 			#NOt Finished
 
 	def lookup(self,key):
-		# TODO call to any known eventservice to findout where it should register.
-		# return: ES address (ip:port)
 		msg = {'msgType':'nodeLookup', 'key': key}
 		self.socket.send_string(json.dumps(msg))
 		designatedServer = self.socket.recv()
@@ -63,9 +61,11 @@ class Publisher:
 
 
 
+
 		#self.register(designatedServer)
 		return self.register(designatedServer)
 		# TODO go register to the designate
+
 
 
 	
