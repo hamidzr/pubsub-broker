@@ -61,16 +61,10 @@ class Publisher:
 		designatedServer = self.socket.recv()
 		print('designated server:' , designatedServer)
 
-		#Kevin modified
-		while designatedServer == self.knownEsAddress:
-			#ask another address
-			i=i+1
-			msg = {'msgType': 'nodeLookup', 'key': key+i}
-			self.socket.send_string(json.dumps(msg))
-			self.knownEsAddress = self.socket.recv()
 
-		self.register(designatedServer)
-		return designatedServer
+
+		#self.register(designatedServer)
+		return self.register(designatedServer)
 		# TODO go register to the designate
 
 
