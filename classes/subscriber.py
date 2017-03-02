@@ -30,7 +30,7 @@ class Subscriber:
 	
 	def register(self,topic, serverAddress):
 		self.socket.disconnect("tcp://" + getPubFromAddress(self.knownEsAddress))
-		self.socket.connect("tcp://" + serverAddress)
+		self.socket.connect("tcp://" + getPubFromAddress(serverAddress))
 		msg = {'msgType':'subscriberRegisterReq','sId':self.sId,'address':self.addr, 'topic':topic}
 		self.reqSocket.send_string(json.dumps(msg))
 		self.reqSocket.recv()
