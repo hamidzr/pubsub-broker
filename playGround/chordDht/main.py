@@ -3,7 +3,7 @@ import hashlib
 import logging
 
 # init
-keyLength = 128 # the number of bits in the key
+keyLength = 160 # the number of bits in the key
 
 
 
@@ -12,7 +12,7 @@ class Node(object):
 	"""docstring for Node"""
 	def __init__(self, name):
 		super(Node, self).__init__()
-		self.id = random.randint(100,999) #random.getrandbits(keyLength) # generate a random k bit hash as ID for nodes
+		self.id = random.randint(10000,99999) #random.getrandbits(keyLength) # generate a random k bit hash as ID for nodes
 		self.next = None
 		self.prev = None
 		self.data = {}
@@ -25,23 +25,23 @@ class Node(object):
 
 
 
-# calculate the distance of nodes
-def distance(a, b):
-	hA = hashKey(a)
-	hB = hashKey(b)
-	print 'calculating distance'
-	if hA==hB:
+# calculate the distance key from node
+def distance(nodeId, key):
+	nodeHash = hashKey(nodeId)
+	keyHash = hashKey(key)
+	print 'calculating node '
+	if nodeHash==keyHash:
 		return 0
-	elif hA<hB:
-		return hB-hA
+	elif nodeHash>keyHash:
+		return nodeHash-keyHash
 	else: # this means that a is located after b ( a is bigger )
-		return (2**keyLength)+(hB-hA)
+		return (2**keyLength)+(keyHash-nodeHash)
 
 # make a kbit hash out of a key
 def hashKey(key):
 	# sha1 return 160bit keys. md5 128
 	key = str(key)
-	return long(hashlib.md5(key).hexdigest(),16)
+	return long(hashlib.sha1(key).hexdigest(),16) #convert to long with base 16
 
 
 
@@ -55,15 +55,15 @@ def findSuccessor(startNode, key):
 	# 	print ('searching for successor')
 	# return current
 	##
-	
 	curNode = startNode.next
-	lowestDistance = distance(curNode.id, key)
+	lowestDistance = distance(startNode.id, key)
 	theNode = curNode
 	while startNode.id != curNode.id:
 		if distance(curNode.id, key) < lowestDistance:
 			lowestDistance = distance(curNode.id, key)
 			theNode = curNode
 		curNode = curNode.next
+
 	print('the successor for key {} is {}'.format(key,theNode))
 	return theNode
 	
@@ -97,8 +97,11 @@ def join(startNode,newNode):
 	toMove = []
 	for key in suc.data:
 		# TODO hash the nodeId only once
-		if hashKey(key) <= hashKey(newNode.id):
+		# if hashKey(key) > hashKey(newNode.id):
+		if hashKey(key) <= hashKey(newNode.id): #TODO THIS LINE SHOULD BE THE WORKING ONE
 			toMove.append(key)
+		else:
+			print(key, ' stays in the node, no need to move it')
 	for key in toMove:
 		#move the key and its data to the newNode
 		print('moving',key,'from',suc.name,'to',newNode.name)
