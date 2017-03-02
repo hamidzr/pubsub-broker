@@ -78,8 +78,10 @@ class EventServer:
 
 	def publish(self, event):
 		# TODO make a publishable event method
-		self.pubSocket.send_string("{} {} {}".format(event.topic, event.body, event.createdAt))
-		logger.info('published: ' + event.__str__())
+		msg = "{} {} {}".format(event.topic, event.body, event.createdAt)
+		self.pubSocket.send_string(msg)
+		logger.info('raw published: ' + msg)
+		# logger.info('published: ' + event.__str__())
 
 	def handlePublisherRegistration(self,msg):
 		# currently handles publisher registration
