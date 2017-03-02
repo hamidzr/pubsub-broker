@@ -3,7 +3,7 @@ import hashlib
 import logging
 
 # init
-k = 128 # the number of bits in the key
+keyLength = 128 # the number of bits in the key
 
 
 
@@ -12,7 +12,7 @@ class Node(object):
 	"""docstring for Node"""
 	def __init__(self, name):
 		super(Node, self).__init__()
-		self.id = random.getrandbits(k) # generate a random k bit hash as ID for nodes
+		self.id = random.randint(100,999) #random.getrandbits(keyLength) # generate a random k bit hash as ID for nodes
 		self.next = None
 		self.prev = None
 		self.data = {}
@@ -27,17 +27,20 @@ class Node(object):
 
 # calculate the distance of nodes
 def distance(a, b):
+	hA = hashKey(a)
+	hB = hashKey(b)
 	print 'calculating distance'
-	if a==b:
+	if hA==hB:
 		return 0
-	elif a<b:
-		return b-a
+	elif hA<hB:
+		return hB-hA
 	else: # this means that a is located after b ( a is bigger )
-		return (2**k)+(b-a)
+		return (2**keyLength)+(hB-hA)
 
 # make a kbit hash out of a key
 def hashKey(key):
 	# sha1 return 160bit keys. md5 128
+	key = str(key)
 	return long(hashlib.md5(key).hexdigest(),16)
 
 
@@ -45,24 +48,23 @@ def hashKey(key):
 # From the start node, find the node responsible
 # for the target key
 def findSuccessor(startNode, key):
-	hashedKey = hashKey(str(key))
-
 	## suggested but buggy findSuccessor
 	# current=startNode
-	# while distance(current.id, hashedKey) > distance(current.next.id, hashedKey):
+	# while distance(current.id, key) > distance(current.next.id, key):
 	# 	current=current.next
 	# 	print ('searching for successor')
 	# return current
 	##
 	
 	curNode = startNode.next
-	lowestDistance = distance(curNode.id, hashedKey)
+	lowestDistance = distance(curNode.id, key)
 	theNode = curNode
 	while startNode.id != curNode.id:
-		if distance(curNode.id, hashedKey) < lowestDistance:
-			lowestDistance = distance(curNode.id, hashedKey)
+		if distance(curNode.id, key) < lowestDistance:
+			lowestDistance = distance(curNode.id, key)
 			theNode = curNode
 		curNode = curNode.next
+	print('the successor for key {} is {}'.format(key,theNode))
 	return theNode
 	
 # Find the responsible node and get the value for
@@ -94,7 +96,8 @@ def join(startNode,newNode):
 	#move the appropriate keys to itself from successor
 	toMove = []
 	for key in suc.data:
-		if hashKey(key) <= newNode.id:
+		# TODO hash the nodeId only once
+		if hashKey(key) <= hashKey(newNode.id):
 			toMove.append(key)
 	for key in toMove:
 		#move the key and its data to the newNode
@@ -131,14 +134,16 @@ for x in xrange(1,4):
 set(n1,'hamid','theOne')
 print(ringToString(n1))
 while True:
-	key = raw_input("key: ")
-	if key == 'addNode':
+	inp = raw_input("input: ")
+	if inp == 'addNode':
 		join(n1,Node(c))
-		c += 1	
+		c += 1
+	elif inp == 'show':
+		print(ringToString(n1))
 	else:
-		val = get(n1, key)
+		val = get(n1, inp)
 		if val:
 			print val
 		else:
 			val = raw_input("value: ")
-			set(n1,key,val)
+			set(n1,inp,val)
