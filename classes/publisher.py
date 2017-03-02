@@ -28,11 +28,12 @@ class Publisher:
 		self.socket.connect("tcp://" + self.knownEsAddress)
 		self.topic = topic
 		self.strength = strength
+		self.nodes = set([]) #suveni
 
 	def register(self,serverAddress):
 		self.socket.disconnect("tcp://" + self.knownEsAddress)
 		self.socket.connect("tcp://" + serverAddress)
-		heartbeatClient(self.pId,serverAddress).start()
+		heartbeatClient(self.pId,serverAddress,self).start() #suveni
 		msg = {'msgType':'publisherRegisterReq','pId':self.pId,'address':self.addr, 'topic':self.topic,'os':self.strength}
 		self.socket.send_string(json.dumps(msg))
 		self.socket.recv()
