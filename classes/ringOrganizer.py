@@ -46,7 +46,9 @@ class ringOrganizer(threading.Thread):
 			else :
 				if msg['type'] == 'nodeDeleteReq' :
 					self.deleteNode(msg)
-					logger.warning('An event server is dead')
+					print(self.nodes)
+					self.repSocket.send_string("Thanks for notifying me the dead es")
+					#ogger.warning('An event server is dead')
 					#self.repSocket.send_string(suggestions)
 				else:
 					logger.warning('message type not found')

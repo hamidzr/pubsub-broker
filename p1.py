@@ -31,6 +31,7 @@ while not registered :
 	print("Registration failed, about to try again")
 
 	registered = p1.lookup(topic)
+	time.sleep(2)
 
 # keep publishing
 while True:
@@ -38,6 +39,7 @@ while True:
 	e1 = Event(p1.topic,body)
 	if not p1.publish(e1):
 		i = i + 1
+		print("Yes, I call the registration here")
 		print("Count of registration:", i)
 		registered = p1.lookup(topic)
 
@@ -45,6 +47,7 @@ while True:
 			i = i + 1
 			print("Count of registration:", i)
 			registered = p1.lookup(topic)
+			time.sleep(2)
 
 	# sleep for 2s
 	time.sleep(2)

@@ -30,6 +30,7 @@ class Publisher:
 		self.strength = strength
 #QUESTION--shouldn't this heartBeatClient connect to the suggested node?
 		self.heartBeatClientObject=heartbeatClient(self.pId,knownEsAddress)
+		#self.heartBeatClientObject.start()
 		self.nodes=set([])
 		self.serverAddress= knownEsAddress
 
@@ -39,7 +40,7 @@ class Publisher:
 		#Check before Register
 		try:
 			self.socket.connect("tcp://" + serverAddress)
-			self.heartBeatClientObject.start()
+			#self.heartBeatClientObject.start()
 			msg = {'msgType':'publisherRegisterReq','pId':self.pId,'address':self.addr, 'topic':self.topic,'os':self.strength}
 			self.socket.send_string(json.dumps(msg))
 			nodesReceived=self.socket.recv()
@@ -57,7 +58,19 @@ class Publisher:
 		except:
 			print ("The node where about to register is dead")
 			self.socket.disconnect("tcp://" + self.serverAddress)
+			self.resetSocket()
 			self.notifyOthers(self.serverAddress)
+
+
+
+			#delete the node locally
+			for nodeAddress in self.nodes.copy():
+				if nodeAddress == serverAddress:
+					#store the ip of this node
+					self.nodes.remove(nodeAddress)
+					break
+
+
 
 			return False
 			#TRY TO RE-LOOKUP
@@ -85,7 +98,13 @@ class Publisher:
 			if (nodeAddress != deadNodeAddr):
 				reqSocket.connect("tcp://" + getRingOrgFromAddress(nodeAddress))
 				reqSocket.send(json.dumps(msg))
+				print(reqSocket.recv())
 				reqSocket.disconnect("tcp://" + getRingOrgFromAddress(nodeAddress))
+
+	def resetSocket(self):
+		self.socket.close()
+		self.socket = self.context.socket(zmq.REQ)
+		self.socket.setsockopt(zmq.RCVTIMEO, 1000)  # milliseconds
 
 	def publish(self, event):
 		try:
@@ -98,7 +117,16 @@ class Publisher:
 		except:
 			print ("the event server is dead !")
 			#Notify other event servers
-			self.socket.disconnect("tcp://" + self.serverAddress)
 			self.notifyOthers(self.serverAddress)
+			#reset socket
+			self.socket.disconnect("tcp://" + self.serverAddress)
+			self.resetSocket()
+
+			#delete the node locally
+			for nodeAddress in self.nodes.copy():
+				if nodeAddress == self.serverAddress:
+					#store the ip of this node
+					self.nodes.remove(nodeAddress)
+					break
 
 			return False
