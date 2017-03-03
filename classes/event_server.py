@@ -211,7 +211,7 @@ class EventServer:
 				reqSocket.disconnect("tcp://"+getRingOrgFromAddress(nodeAddress))
 
 	def start(self):
-		heartbeatServer(self).start()
+		heartbeatServer(self,self.mRingOrganizer.nodes).start()#suveni
 		self.mRingOrganizer.start()
 		logger.info('started')
 		while True:
