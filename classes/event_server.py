@@ -43,7 +43,7 @@ class EventServer:
 		self.repSocket.bind("tcp://"+address)
 		self.pubSocket.bind("tcp://"+getPubFromAddress(address))
 		self.mHashRing = HashRing(nodes=[address])
-		self.mRingOrganizer = ringOrganizer(self.mHashRing, getRingOrgFromAddress(address));
+		self.mRingOrganizer = ringOrganizer(self.mHashRing, getRingOrgFromAddress(address))
 		self.mRingOrganizer.nodes.add(address)
 
 	# handles different message types
@@ -109,8 +109,9 @@ class EventServer:
 			self.dominantPublishers.append(publisher)
 			self.dominantPublishersSet.add(pId)
 
-		self.repSocket.send(b"registration ")
-
+		#self.repSocket.send(b"registration ")
+		suggestions = self.mRingOrganizer.suggestNodes()
+		self.repSocket.send_string(suggestions)
 		# self.store(self.getEvent(msg))
 		# self.publish(self.getEvent(msg))
 

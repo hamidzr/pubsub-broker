@@ -5,51 +5,50 @@ import logging
 from classes.utils import *
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__) #Q will this make it shared between all objects?
-hdlr = logging.FileHandler('heartbeatServer.log',mode='w')
+logger = logging.getLogger(__name__)  # Q will this make it shared between all objects?
+hdlr = logging.FileHandler('heartbeatServer.log', mode='w')
 logger.addHandler(hdlr)
 
-class heartbeatServer (threading.Thread):
 
-	daemon = True # make it a deamon
-	clients = {}
+class heartbeatServer(threading.Thread):
+    daemon = True  # make it a deamon
+    clients = {}
 
-	def __init__(self, eventServer):
-		threading.Thread.__init__(self)
-		context = zmq.Context()
-		self.eventServer = eventServer # get a handle on eventServer
-		self.socket = context.socket(zmq.REP)
-		self.socket.bind("tcp://" + getHbServerFromAddress(eventServer.addr))
-		# logging.basicConfig(filename="log/{}hbServer.log".format(self.addr),level=logging.DEBUG)
+    def __init__(self, eventServer):
+        threading.Thread.__init__(self)
+        context = zmq.Context()
+        self.eventServer = eventServer  # get a handle on eventServer
+        self.socket = context.socket(zmq.REP)
+        self.socket.bind("tcp://" + getHbServerFromAddress(eventServer.addr))
+
+    # logging.basicConfig(filename="log/{}hbServer.log".format(self.addr),level=logging.DEBUG)
 
 	def run(self):
-		logger.debug( 'listening for heartbeats')
+		logger.debug('listening for heartbeats')
 		while True:
 			client_id = self.socket.recv()
 			self.clients[client_id] = time.time()
-			logger.info( ' heartbeat received from publisher')
-			#Kevin edited here to send all nodes' ip to heartbeat_client
+			logger.info(' heartbeat received from publisher')
 			self.socket.send(b"ok")
-			self.repSocket.send_string(self.eventServer.mRingOrganizer.suggestNodes())
-			deadClientsArr = self.checkDeadClients()	
-			logger.info(  deadClientsArr		)
+			deadClientsArr = self.checkDeadClients()
+			logger.info(deadClientsArr	)
+
 			for dClient in deadClientsArr:
+				self.eventServer.unregisterPublisher(dClient)
 				# TODO remove from dominant publishers and history
 				# CALL undergister method
-				self.eventServer.unregisterPublisher(dClient)
-
 		logger.info( 'heartbeat server done')
 
 	def checkDeadClients(self):
 		logger.info( 'current clients are')
 		logger.info( self.clients)
-		current_time = time.time() #aprox
+		current_time = time.time()  # aprox
 		deadClients = []
 		# find dead clients
 		for key, val in self.clients.iteritems():
 			if current_time - val > 10:
 				deadClients.append(key)
-		
+
 		for dc in deadClients:
 			logger.warning( "{} is dead".format(dc))
 			self.clients.pop(dc)
