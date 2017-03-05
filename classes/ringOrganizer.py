@@ -25,7 +25,12 @@ class ringOrganizer(threading.Thread):
 		self.hr.add_node(msg['address'])
 		self.nodes.add(msg['address'])
 		logger.info('node added: ' + msg['address'])
-	
+
+	def deleteNode(self,msg):
+		self.hr.remove_node(msg['address'])
+		self.nodes.remove(msg['address'])
+		logger.info('node removed: ' + msg['address'])
+
 	def suggestNodes(self):
 		return ', '.join(self.nodes)
 
@@ -38,9 +43,13 @@ class ringOrganizer(threading.Thread):
 				self.addNode(msg)
 				suggestions = self.suggestNodes()
 				self.repSocket.send_string(suggestions)
-			else:
-				logger.warning('message type not found')
-				self.repSocket.send_string('bad message')
-
-
-		
+			else :
+				if msg['type'] == 'nodeDeleteReq' :
+					self.deleteNode(msg)
+					print(self.nodes)
+					self.repSocket.send_string("Thanks for notifying me the dead es")
+					#ogger.warning('An event server is dead')
+					#self.repSocket.send_string(suggestions)
+				else:
+					logger.warning('message type not found')
+					self.repSocket.send_string('bad message')
