@@ -1,9 +1,10 @@
 import random
 import hashlib
 import logging
+import os
 
 # init
-keyLength = 160 # the number of bits in the key
+keyLength = 8 # the number of bits in the key # QUESTION there should be consequenses if this is far bigger than the number of our nodes
 
 
 
@@ -12,13 +13,14 @@ class Node(object):
 	"""docstring for Node"""
 	def __init__(self, name):
 		super(Node, self).__init__()
-		self.id = random.randint(10000,99999) #random.getrandbits(keyLength) # generate a random k bit hash as ID for nodes
+		self.id = os.urandom(1 << 20) #random.getrandbits(keyLength) # generate a random k bit hash as ID for nodes
+		self.pos = position(self.id)
 		self.next = None
 		self.prev = None
 		self.data = {}
 		self.name = str(name)
 	def __str__(self):
-		return self.name + ' data: ' + self.data.__str__()
+		return self.name + ' position: '+ str(self.pos) +' data: ' + self.data.__str__()
 
 
 
@@ -27,44 +29,56 @@ class Node(object):
 
 # calculate the distance key from node
 def distance(nodeId, key):
-	nodeHash = hashKey(nodeId)
-	keyHash = hashKey(key)
-	print 'calculating node '
+	nodeHash = position(nodeId)
+	keyHash = position(key)
+	print("key position: ", keyHash)
+	distance = None;
 	if nodeHash==keyHash:
-		return 0
+		distance = 0
 	elif nodeHash>keyHash:
-		return nodeHash-keyHash
-	else: # this means that a is located after b ( a is bigger )
-		return (2**keyLength)+(keyHash-nodeHash)
+		distance = nodeHash-keyHash
+	elif keyHash > nodeHash: # this means that a is located after b ( a is bigger )
+		distance = (2**keyLength)-(keyHash-nodeHash)
+	else: #redundant
+		distance = False
+	print("calculated distance: ", distance)
+	return distance
 
 # make a kbit hash out of a key
-def hashKey(key):
+def position(key):
 	# sha1 return 160bit keys. md5 128
 	key = str(key)
-	return long(hashlib.sha1(key).hexdigest(),16) #convert to long with base 16
+	res = int(hashlib.md5(key).hexdigest(),16) % 2**keyLength #convert to int with base 16
+	return res
 
 
+#helper func: move the keys and the data from one node to the other
+#keys: array of keys
+def moveKeys(keys,source,destination):
+	print("moving keys",keys)
+	for key in keys:
+		destination.data[key] = source.data[key]
+		del source.data[key]
 
 # From the start node, find the node responsible
 # for the target key
 def findSuccessor(startNode, key):
-	## suggested but buggy findSuccessor
+	# # suggested but buggy findSuccessor
 	# current=startNode
 	# while distance(current.id, key) > distance(current.next.id, key):
 	# 	current=current.next
-	# 	print ('searching for successor')
+	# 	print ('searching for successor NEVER RUNS')
 	# return current
-	##
+	# #
 	curNode = startNode.next
 	lowestDistance = distance(startNode.id, key)
-	theNode = curNode
+	theNode = startNode
 	while startNode.id != curNode.id:
 		if distance(curNode.id, key) < lowestDistance:
 			lowestDistance = distance(curNode.id, key)
 			theNode = curNode
 		curNode = curNode.next
-
-	print('the successor for key {} is {}'.format(key,theNode))
+	print('the successor is {} - distance: {}'.format(theNode,lowestDistance))
 	return theNode
 	
 # Find the responsible node and get the value for
@@ -75,7 +89,7 @@ def get(startNode, key):
 		print("getting the data for key {} from node {}".format(key,node))
 		return node.data[key]
 	else:
-		print("key {} is not set on {}".format(key,node))
+		print("key {} - {} is not set on {}".format(key,position(key),node))
 		return False
 
 # Find the responsible node and set the value
@@ -83,11 +97,12 @@ def get(startNode, key):
 def set(startNode, key, value):
 	node=findSuccessor(startNode, key)
 	node.data[key]=value
-	print("set the key {} to value {} on node {}".format(key,value,node))
+	print("set the key {} - {} to value {} on node {}".format(key,position(key),value,node))
 
 
 #let nodes join to an existing ring of nodes. can be turned into a method on node
 def join(startNode,newNode):
+	print("node",newNode.__str__(),"is joining.")
 	print(ringToString(startNode))
 	#put the new node in its position
 	suc = findSuccessor(startNode,newNode.id)
@@ -97,16 +112,14 @@ def join(startNode,newNode):
 	toMove = []
 	for key in suc.data:
 		# TODO hash the nodeId only once
-		# if hashKey(key) > hashKey(newNode.id):
-		if hashKey(key) <= hashKey(newNode.id): #TODO THIS LINE SHOULD BE THE WORKING ONE
+		# if position(key) > position(newNode.id):
+		if position(key) <= position(newNode.id):
 			toMove.append(key)
+			print('moving',key,'from',suc.name,'to',newNode.name)
 		else:
 			print(key, ' stays in the node, no need to move it')
-	for key in toMove:
-		#move the key and its data to the newNode
-		print('moving',key,'from',suc.name,'to',newNode.name)
-		newNode.data[key] = suc.data[key]
-		del suc.data[key]
+	moveKeys(toMove,suc,newNode)
+	# moveKeys(suc.data.keys(),suc,newNode)
 
 	#update the nodes pointers to point to this newNode (the tables)
 	newNode.prev = prev
@@ -114,6 +127,17 @@ def join(startNode,newNode):
 	prev.next = newNode
 	suc.prev = newNode
 	print(ringToString(startNode))
+
+#facilitates leaving of a node from the ring.
+def leave(leavingNode):
+	print("node",leavingNode.__str__(),"is leaving.")
+	suc = leavingNode.next
+	pred = leavingNode.prev
+	print(ringToString(suc))
+	moveKeys(leavingNode.data.keys(),leavingNode,suc)
+	pred.next = suc
+	suc.prev = pred
+	print(ringToString(suc))
 
 #show a visual of the ring for debugging purposes
 def ringToString(node):
@@ -130,7 +154,7 @@ n1.prev = n1
 
 
 c = 1
-for x in xrange(1,4):
+for x in xrange(1,7):
 	join(n1,Node(c))
 	c = c+1
 
@@ -143,6 +167,9 @@ while True:
 		c += 1
 	elif inp == 'show':
 		print(ringToString(n1))
+	elif inp == 'delNode':
+		node = findSuccessor(n1,raw_input("key to del the node "))
+		leave(node)
 	else:
 		val = get(n1, inp)
 		if val:
