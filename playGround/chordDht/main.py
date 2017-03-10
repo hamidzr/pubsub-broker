@@ -15,7 +15,7 @@ class Node(object):
 		super(Node, self).__init__()
 		self.id = os.urandom(1 << 20) #random.getrandbits(KEYLENGTH) # generate a random k bit hash as ID for nodes
 		self.pos = position(self.id)
-		self.fTable = [False]*KEYLENGTH  # consider changing to another structure to store more successors
+		self.fTable = [self]*KEYLENGTH  # consider changing to another structure to store more successors
 		self.pred = None # predecessor
 		self.data = {}
 		self.name = str(name)
@@ -36,27 +36,46 @@ class Node(object):
 		view = ""
 		for x in self.fTable:
 			if isinstance(x,Node):
-				view += str(x.pos) + " "
+				view += str(x.pos) + ", "
 			else:
 				view += "None "
 		return view
 
 	def chFindSuccessor(self,pos):
-		# check if we are the next guy is the suc
-		if key-1 in xrange(self.pos,self.fTable[0].pos): # -1 to make the range like (this]
+		print('asking node {} to find suc for {}'.format(self.pos,pos))
+		if self.pos == self.fTable[0].pos:
+			print('WARNING badim khodame  ') #should never see this
+		# check if the next node is the suc
+		if pos > self.pos and pos <= self.fTable[0].pos:
 			return self.fTable[0]
+		# elif pos <= self.fTable[0].pos and pos < self.pos and isTheBiggest(self):
+		# 	return self
 		else:
 			node = self.closestPrecedingNode(pos)
 			return node.chFindSuccessor(pos)
 
 	# search the local table for highest predecessor of Id
 	def closestPrecedingNode(self,pos):
-		for i in xrange(KEYLENGTH,-1,-1):
-			if self.fTable[i].pos in xrange(self.pos+1,pos):
-				return finger[i]
-		return self
+		# print(self.vFTable())
+		# for i in xrange(KEYLENGTH-1,-1,-1):
+		# 	# if self.fTable[i].pos < self.pos and  self.fTable[i].pos < pos:
+		# 	# 	raw_input('peyda kard {}'.format(self.fTable[i]))
+		# 	# 	return self.fTable[i]
+		# 	if self.fTable[i].pos > self.pos and self.fTable[i].pos < pos:
+		# 		raw_input('peyda kard {}'.format(self.fTable[i]))
+		# 		return self.fTable[i]
+		# raw_input('couldnt find closest')
+		# return self
+		# arr = []
+		# for n in self.fTable:
+		# 	arr.append(n.pos)
 
-	#2nd way to find suc
+		closestPNode = findClosest(pos,self.fTable)
+		print('next jump is: ',closestPNode.__str__())
+		raw_input()
+		return closestPNode
+
+	#another way to find suc (not complete)
 	def fsbak(self,key):
 		# check if we are the suc
 		if key in self.data.keys():
@@ -66,6 +85,27 @@ class Node(object):
 			for i in xrange(1,KEYLENGTH):
 				if self.fTable[0] and self.fTable[0]:
 					pass
+
+#tmp check if is the biggest in its ftable
+def isTheBiggest(node):
+	res = True
+	for x in node.fTable:
+		if x >= node.pos:
+			res = False
+	return res
+
+#alternative closestPreceidingNode. 
+# gets an array of positions ( generated from a fingertable )
+# returns ---- preceding node of a fingerTable to a pos(of a key)
+def findClosest(pos,fTable):
+	fTable.sort(key=lambda x: x.pos, reverse=False)
+	closestI = len(fTable)-1
+	for indx,val in enumerate(fTable):
+		if val.pos > pos:
+			closestI = len(fTable)-1 if indx == 0 else indx -1
+			break
+	print('next jump is to pos {} which is node: {}'.format(fTable[closestI].pos,fTable[closestI]))
+	return fTable[closestI]
 
 # calculate the distance key from node
 def distance(nodePos, keyPos):
@@ -189,10 +229,11 @@ n1.pred = n1
 
 n1.fTable[0] = n1
 c = 1
-for x in xrange(1,7):
+for x in xrange(1,8):
 	join(n1,Node(c))
 	c = c+1
-set(n1,'hamid','theOne')
+
+# set(n1,'h','theOne')
 print(ringToString(n1))
 
 while True:
@@ -205,8 +246,11 @@ while True:
 	elif inp == 'delNode':
 		node = findSuccessor(n1,position(raw_input("key to del the node ")))
 		leave(node)
-	elif inp == 'fSuc':
+	elif inp == 'fs':
 		node = findSuccessor(n1,int(raw_input("find suc for a position (asking node1 ): ")))
+		print node
+	elif inp == 'cs':
+		node = n1.chFindSuccessor(int(raw_input("find suc for a position (asking node1 ): ")))
 		print node
 	elif inp == 'pos':
 		print position(raw_input("get the position of this: "))
