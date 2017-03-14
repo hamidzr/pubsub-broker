@@ -43,7 +43,7 @@ class EventServer:
 		self.repSocket.bind("tcp://"+address)
 		self.pubSocket.bind("tcp://"+getPubFromAddress(address))
 		self.mHashRing = HashRing(nodes=[address])
-		self.mRingOrganizer = ringOrganizer(self.mHashRing, getRingOrgFromAddress(address));
+		self.mRingOrganizer = ringOrganizer(self.mHashRing, getRingOrgFromAddress(address))
 		self.mRingOrganizer.nodes.add(address)
 
 	# handles different message types
@@ -111,8 +111,9 @@ class EventServer:
 			self.dominantPublishers.append(publisher)
 			self.dominantPublishersSet.add(pId)
 
-		self.repSocket.send(b"registration ")
-
+		#self.repSocket.send(b"registration ")
+		suggestions = self.mRingOrganizer.suggestNodes()
+		self.repSocket.send_string(suggestions)
 		# self.store(self.getEvent(msg))
 		# self.publish(self.getEvent(msg))
 
@@ -183,14 +184,15 @@ class EventServer:
 	def findRingNode(self,msg):
 		# TODO  determine the node that the subscriber or publisher should register to
 		# return my address for now
-		designatedEs = self.mHashRing.get_node(msg['key'])
+
+		designatedEs = self.mRingOrganizer.hr.get_node(msg['key'])
 		self.repSocket.send_string(designatedEs)
 
 
 	def joinNotifyNode(self,neighborAddress):
 		# add it to our own nodesTable
 		self.mRingOrganizer.nodes.add(neighborAddress)
-		self.mHashRing.add_node(neighborAddress)
+		self.mRingOrganizer.hr.add_node(neighborAddress)
 		# notify the neighbor to add us to it's table
 		msg = {'type': 'nodeJoinReq', 'address':self.addr}
 		#connect to neighborRingOrganizer
@@ -204,7 +206,7 @@ class EventServer:
 			# if I dont know this node
 			if (nodeAddress not in self.mRingOrganizer.nodes):
 				self.mRingOrganizer.nodes.add(nodeAddress)
-				self.mHashRing.add_node(nodeAddress)
+				self.mRingOrganizer.hr.add_node(nodeAddress)
 				reqSocket.connect("tcp://"+getRingOrgFromAddress(nodeAddress))
 				reqSocket.send(json.dumps(msg))
 				print('more suggestions: ', reqSocket.recv())
