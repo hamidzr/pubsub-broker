@@ -24,7 +24,8 @@ class heartbeatSubscriber (threading.Thread):
         self.socket.setsockopt(zmq.RCVTIMEO, 300)
         self.subscriber = subscriber  # suveni
         self.pubSocket = self.context.socket(zmq.PUB)
-        self.pubSocket.bind("tcp://" + getPubFromAddress(self.subscriber.addr))
+        self.pubSocket.connect("tcp://" + getSubFromAddress(subscriber.addr))
+        #self.pubSocket.bind("tcp://" + getPubFromAddress(self.subscriber.addr))
         print('HBSUB binded addr: '+ getPubFromAddress(self.subscriber.addr))
     #def changeServAddr(self,servAddr):
 	#	self.socket.disconnect("tcp://" + getHbServerFromAddress(self.servAddr))
@@ -59,9 +60,10 @@ class heartbeatSubscriber (threading.Thread):
                 #e1=Event(self.publisher.topic, "ES is dead")
                 msg = "{} {} {}".format(self.subscriber.topic, "-1",time.time())
                 #msg = {'topic': self.subscriber.topic, 'body': 'ES is dead', 'createdAt': time.time()}
-
+                self.subscriber.nodes.remove(self.servAddr)
                 self.pubSocket.send_string(msg)
-
+                self.pubSocket.disconnect(("tcp://" + getSubFromAddress(self.subscriber.addr)))
+                self.pubSocket.close()
                 print('I sent: '+msg)
                 logger.info('heartbeating stopped')
                 sys.exit(0)

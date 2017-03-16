@@ -25,3 +25,7 @@ def getPubFromAddress(address):
 	addr = changePortBy(address,2000)
 	logger.info('Publishing addr: ' + addr)
 	return addr
+def getSubFromAddress(address):
+	addr = changePortBy(address,3000)
+	logger.info('Sublishing addr: ' + addr)
+	return addr

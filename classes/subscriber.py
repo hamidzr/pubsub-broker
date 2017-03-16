@@ -15,10 +15,11 @@ logger.addHandler(hdlr)
 class Subscriber:
 	# attribiutes
 	sId = randint(0,999)
-	addr = str(randint(1000,9999))+':'+str(randint(1000,9999))
+	addr = '127.0.0.1:'+str(randint(2000,3000))
 	# addr = commands.getstatusoutput("ifconfig | awk '/inet addr/{print substr($2,6)}' | sed -n '1p'")[1]
 	context = zmq.Context()
 	subsocket = context.socket(zmq.SUB)
+	subsocket.bind("tcp://" + getSubFromAddress(addr))
 	#subsocket.bind("tcp://" + getPubFromAddress(addr))
 	reqSocket = context.socket(zmq.REQ)
 
@@ -36,22 +37,27 @@ class Subscriber:
 	
 	def register(self,topic, serverAddress):
 		self.resetSocket()
+		self.knownEsAddress=serverAddress
 		self.reqSocket.connect("tcp://" + serverAddress)
 		print("knownEsAddress: "+ self.knownEsAddress)
 		print("serverAddress: " + serverAddress)
 		if self.checkEventServer():
-			#self.subsocket.disconnect("tcp://" + getPubFromAddress(self.knownEsAddress))
-			self.subsocket.connect("tcp://" + getPubFromAddress(serverAddress))
-			#heartbeatClient(self.sId,serverAddress,self).start()#suveni
-			msg = {'msgType':'subscriberRegisterReq','sId':self.sId,'address':self.addr, 'topic':topic}
-			self.reqSocket.send_string(json.dumps(msg))
-			self.reqSocket.recv()
-			logger.info( 'register req sent')
-			self.subsocket.connect("tcp://" + getPubFromAddress(self.addr))
-			print('subsocket connects to: '+getPubFromAddress(self.addr))
-			print('subsocket connects to: ' + getPubFromAddress(serverAddress))
 			self.heartBeatPublisherObject = heartbeatSubscriber(self.sId, serverAddress, self)  # suveni
 			self.heartBeatPublisherObject.start()
+			print('Im here')
+			msg = {'msgType': 'subscriberRegisterReq', 'sId': self.sId, 'address': self.addr, 'topic': topic}
+
+			self.reqSocket.send_string(json.dumps(msg))
+			self.reqSocket.recv()
+			self.subsocket.connect("tcp://" + getPubFromAddress(serverAddress))
+
+			#heartbeatClient(self.sId,serverAddress,self).start()#suveni
+
+			logger.info( 'register req sent')
+			#self.subsocket.connect("tcp://" + getPubFromAddress(self.addr))
+			print('subsocket connects to: '+getPubFromAddress(self.addr))
+			print('subsocket connects to: ' + getPubFromAddress(serverAddress))
+
 
 
 			return True
@@ -59,6 +65,8 @@ class Subscriber:
 			self.resetSocket()
 			return False
 	def lookup(self,key):
+		print('nodes are: ')
+		print(self.nodes)
 		if self.nodes:
 			self.knownEsAddress=next(iter(self.nodes))
 		self.reqSocket.connect("tcp://" + self.knownEsAddress)
