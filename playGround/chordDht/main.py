@@ -22,7 +22,7 @@ class Node(object):
 		# have and maintain a self.successor?
 
 	def __str__(self):
-		return self.name + ' position: '+ str(self.pos) +' data: ' + self.data.__str__() + ' fTable: ' + self.vFTable()
+		return 'node: '+ self.name + ' position: '+ str(self.pos) +' data: ' + self.data.__str__() + ' fTable: ' + self.vFTable()
 	
 	def genFingerTable(self):
 		# self.fTable = [] # null it out for now
@@ -42,7 +42,7 @@ class Node(object):
 		return view
 
 	def chFindSuccessor(self,pos):
-		print('asking node {} to find suc for {}'.format(self.pos,pos))
+		print('asking node with pos {} to find suc for {}'.format(self.pos,pos))
 		if self.pos == self.fTable[0].pos:
 			print('WARNING badim khodame  ') #should never see this
 		# check if the next node is the suc
@@ -56,6 +56,7 @@ class Node(object):
 
 	# search the local table for highest predecessor of Id
 	def closestPrecedingNode(self,pos):
+		# QUESTION: the alg from the paper can't find the closest preceding node.
 		# print(self.vFTable())
 		# for i in xrange(KEYLENGTH-1,-1,-1):
 		# 	# if self.fTable[i].pos < self.pos and  self.fTable[i].pos < pos:
@@ -66,13 +67,10 @@ class Node(object):
 		# 		return self.fTable[i]
 		# raw_input('couldnt find closest')
 		# return self
-		# arr = []
-		# for n in self.fTable:
-		# 	arr.append(n.pos)
 
 		closestPNode = findClosest(pos,self.fTable)
-		print('next jump is: ',closestPNode.__str__())
-		raw_input()
+		print('next jump is to: ',closestPNode.__str__())
+		raw_input("press enter to continue jumping")
 		return closestPNode
 
 	#another way to find suc (not complete)
@@ -175,7 +173,7 @@ def set(startNode, key, value):
 
 #let nodes join to an existing ring of nodes. can be turned into a method on node
 def join(startNode,newNode):
-	print("node",newNode.__str__(),"is joining.")
+	print(newNode.__str__(),"is joining.")
 	print(ringToString(startNode))
 	#put the new node in its position
 	suc = findSuccessor(startNode,newNode.pos)
@@ -215,7 +213,9 @@ def leave(leavingNode):
 
 #show a visual representation of the ring for debugging purposes
 def ringToString(node):
+	print("generating a view of first 10 items nodes in the ring: ")
 	string = ''
+	# this might generate some repetition for now. if n less than 10
 	for x in xrange(1,10):
 		string += node.__str__() + "\n"
 		node.genFingerTable() # CHANGE use this to keep the ftables updated for now
