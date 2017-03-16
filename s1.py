@@ -36,10 +36,10 @@ while True:
 	logger.info('recieved: ' + msg)
 	#print('msg after split: ')
 	#print(msg.split(' '))
-	if msg.split(' ')[1] == '-1':
-		print('I received ES is dead')
-		srvAddress = s1.lookup(topic)
-		alive = s1.register(topic, srvAddress)
-		s1.subscribe(topic)
+	# if msg.split(' ')[1] == '-1':
+	# 	print('I received ES is dead')
+	# 	srvAddress = s1.lookup(topic)
+	# 	alive = s1.register(topic, srvAddress)
+	# 	s1.subscribe(topic)
 
 

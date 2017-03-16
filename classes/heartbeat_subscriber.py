@@ -58,12 +58,20 @@ class heartbeatSubscriber (threading.Thread):
                 print("HBClient is gonna kill itself")
                 #e1=Event(self.publisher.topic, "ES is dead")
                 msg = "{} {} {}".format(self.subscriber.topic, "-1",time.time())
+
                 #msg = {'topic': self.subscriber.topic, 'body': 'ES is dead', 'createdAt': time.time()}
 
                 self.pubSocket.send_string(msg)
 
                 print('I sent: '+msg)
+
+                print('I received ES is dead')
+                topic = self.subscriber.topic
+                srvAddress = self.subscriber.lookup(topic)
+                alive = self.subscriber.register(topic, srvAddress)
+                self.subscriber.subscribe(topic)
+
                 logger.info('heartbeating stopped')
-                sys.exit(0)
+                # sys.exit(0)
 
 

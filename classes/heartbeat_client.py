@@ -46,7 +46,7 @@ class heartbeatClient (threading.Thread):
 				#for name in self.pubSub.nodes:
 				#	print ', '.join(str(item) for item in name)
 				#logger.info(ack)
-				logger.info('received the nodes from the eventserver ring')#suveni
+				# logger.info('received the nodes from the eventserver ring')#suveni
 				time.sleep(5)
 			except:
 				print("HBClient is gonna kill itself")
