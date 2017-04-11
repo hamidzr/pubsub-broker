@@ -60,6 +60,8 @@ class EventServer:
 			self.handleSubscriberRegistration(msg)
 		elif msg['msgType'] == 'nodeLookup':
 			self.findRingNode(msg)
+		elif msg['msgType'] == 'CheckCheck':
+			self.handleCheckFromSub(msg)
 		elif msg['msgType'] == 'event':
 			self.repSocket.send(b"ack")
 			# check if it's a good source. check against a good 'set' of publishers
@@ -79,9 +81,17 @@ class EventServer:
 	def publish(self, event):
 		# TODO make a publishable event method
 		msg = "{} {} {}".format(event.topic, event.body, event.createdAt)
+		#msg = {'topic': event.topic, 'body': event.body, 'createdAt': event.createdAt}
+		#self.pubSocket.send_string(json.dumps(msg))
+
+		#msg = "{} {} {}".format(event.topic, event.body, event.createdAt)
 		self.pubSocket.send_string(msg)
 		logger.info('raw published: ' + msg)
 		# logger.info('published: ' + event.__str__())
+	def handleCheckFromSub(self,msg):
+		suggestions = self.mRingOrganizer.suggestNodes()
+		self.repSocket.send_string(suggestions)
+
 
 	def handlePublisherRegistration(self,msg):
 		# currently handles publisher registration
@@ -213,7 +223,8 @@ class EventServer:
 				reqSocket.disconnect("tcp://"+getRingOrgFromAddress(nodeAddress))
 
 	def start(self):
-		heartbeatServer(self).start()
+		#heartbeatServer(self).start()
+		heartbeatServer(self,self.mRingOrganizer.nodes).start()#suveni
 		self.mRingOrganizer.start()
 		logger.info('started')
 		while True:

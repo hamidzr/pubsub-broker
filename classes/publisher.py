@@ -29,7 +29,8 @@ class Publisher:
 		self.topic = topic
 		self.strength = strength
 #QUESTION--shouldn't this heartBeatClient connect to the suggested node?
-		self.heartBeatClientObject=heartbeatClient(self.pId,knownEsAddress)
+		#self.heartBeatClientObject=heartbeatClient(self.pId,knownEsAddress)
+		#self.heartBeatClientObject=heartbeatClient(self.pId,knownEsAddress,self)#suveni
 		#self.heartBeatClientObject.start()
 		self.nodes=set([])
 		self.serverAddress= knownEsAddress
@@ -50,9 +51,11 @@ class Publisher:
 				if (nodeAddress not in self.nodes):
 					#store the ip of this node
 					self.nodes.add(nodeAddress)
-
 			# self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
 			logger.info('register request sent')
+			self.heartBeatClientObject = heartbeatClient(self.pId, serverAddress, self)  # suveni
+			self.heartBeatClientObject.start()
+
 
 			return True
 		except:
@@ -60,8 +63,6 @@ class Publisher:
 			self.socket.disconnect("tcp://" + self.serverAddress)
 			self.resetSocket()
 			self.notifyOthers(self.serverAddress)
-
-
 
 			#delete the node locally
 			for nodeAddress in self.nodes.copy():
@@ -77,6 +78,8 @@ class Publisher:
 			#NOt Finished
 
 	def lookup(self,key):
+		if self.nodes:
+			self.knownEsAddress=next(iter(self.nodes))
 		self.socket.connect("tcp://" + self.knownEsAddress)
 		msg = {'msgType':'nodeLookup', 'key': key}
 		self.socket.send_string(json.dumps(msg))
