@@ -10,13 +10,16 @@ class heartbeatClient (threading.Thread):
 
 	daemon = True # make it a deamon
 
-	def __init__(self, pId, servAddr):
+	def __init__(self, pId, servAddr,pubSub):#suveni
 		threading.Thread.__init__(self)
 		self.pId = pId
 		self.servAddr = servAddr
 		context = zmq.Context()
 		self.socket = context.socket(zmq.REQ)
-		self.socket.connect("tcp://" + getHbServerFromAddress(servAddr))
+
+		self.socket.connect("tcp://"+getHbServerFromAddress(servAddr))
+		self.pubSub = pubSub #suveni
+
 
 	def run(self):
 		logging.basicConfig(level=logging.INFO)
@@ -27,8 +30,13 @@ class heartbeatClient (threading.Thread):
 		logger.info('we are alive - heartbeating')
 		while True:
 			self.socket.send(b"{}".format(self.pId))
-			ack = self.socket.recv()
-			logger.info(ack)
-			time.sleep(5)
 
-		logger.info('heartbeating stopped')
+			#ack = self.socket.recv() suveni
+			inputNode = self.socket.recv() #suveni
+ 			self.pubSub.nodes = eval(inputNode)#.decode() suveni
+			for name in self.pubSub.nodes:
+				print ', '.join(str(item) for item in name)
+			logger.info( 'received the nodes from the eventserver ring') #suveni
+			time.sleep(5)	
+		logger.info( 'heartbeating stopped')
+

@@ -3,6 +3,7 @@ import zmq
 from random import randint
 import logging
 from classes.utils import *
+from classes.heartbeat_client import *
 
 
 logging.basicConfig(level=logging.INFO)
@@ -26,11 +27,13 @@ class Subscriber:
 		self.knownEsAddress = esAddr
 		self.socket.connect("tcp://" + getPubFromAddress(esAddr))
 		self.reqSocket.connect("tcp://" + esAddr)
+		self.nodes = set([])#suveni
 		# logging.basicConfig(filename="log/{}.log".format('S' + self.addr),level=logging.DEBUG)
 	
 	def register(self,topic, serverAddress):
 		self.socket.disconnect("tcp://" + getPubFromAddress(self.knownEsAddress))
 		self.socket.connect("tcp://" + getPubFromAddress(serverAddress))
+		heartbeatClient(self.sId,serverAddress,self).start()#Add hbclient to subscribers suveni
 		msg = {'msgType':'subscriberRegisterReq','sId':self.sId,'address':self.addr, 'topic':topic}
 		self.reqSocket.send_string(json.dumps(msg))
 		self.reqSocket.recv()

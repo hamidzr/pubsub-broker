@@ -28,10 +28,22 @@ class Publisher:
 		#self.socket.connect("tcp://" + self.knownEsAddress)
 		self.topic = topic
 		self.strength = strength
+#<<<<<<< HEAD
+		self.nodes = set([]) #suveni
+
+#	def register(self,serverAddress):
+#		self.socket.disconnect("tcp://" + self.knownEsAddress)
+#		self.socket.connect("tcp://" + serverAddress)
+#		heartbeatClient(self.pId,serverAddress,self).start() #suveni
+#		msg = {'msgType':'publisherRegisterReq','pId':self.pId,'address':self.addr, 'topic':self.topic,'os':self.strength}
+#		self.socket.send_string(json.dumps(msg))
+#		self.socket.recv()
+#		logger.info('register request sent')
+#=======
 #QUESTION--shouldn't this heartBeatClient connect to the suggested node?
-		self.heartBeatClientObject=heartbeatClient(self.pId,knownEsAddress)
+		self.heartBeatClientObject=heartbeatClient(self.pId,knownEsAddress,self)#suveni
 		#self.heartBeatClientObject.start()
-		self.nodes=set([])
+		#self.nodes=set([])
 		self.serverAddress= knownEsAddress
 
 	def register(self,serverAddress):
@@ -75,6 +87,7 @@ class Publisher:
 			return False
 			#TRY TO RE-LOOKUP
 			#NOt Finished
+#>>>>>>> 0ffa4a4d417f91c726c03e042532c3749a4c0cbc
 
 	def lookup(self,key):
 		self.socket.connect("tcp://" + self.knownEsAddress)
