@@ -5,6 +5,11 @@ from classes.event import *
 import logging
 from random import randint
 import commands
+from classes.utils import *
+
+
+
+
 
 logging.basicConfig(level=logging.INFO)
 # logging.basicConfig(filename="log/{}.log".format('ES' + self.addr),level=logger.info)
@@ -16,7 +21,7 @@ class EventServer:
 	# attribiutes
 	
 	# current host's ip address
-	addr = str(randint(1000,9999))
+	addr = 0
 	# addr = commands.getstatusoutput("ifconfig | awk '/inet addr/{print substr($2,6)}' | sed -n '1p'")[1]
 	context = zmq.Context()
 	pullSocket = context.socket(zmq.PULL)
@@ -32,9 +37,27 @@ class EventServer:
 	subscribers=[]
 
 	# constructor
-	def __init__(self):
-		self.pullSocket.bind("tcp://*:5555")
-		self.pubSocket.bind("tcp://*:6666")
+	def __init__(self,address):
+		self.addr = address
+		self.pullSocket.bind("tcp://" + getPullFromAddress(address))
+		self.pubSocket.bind("tcp://" + getPubFromAddress(address))
+		# connect to zk client
+		self.zk = KazooClient(hosts='localhost:2181')
+		self.zk.start()
+		self.zk.add_listener(zk_listener)
+		# create and ephimeral node
+		self.zk.create("/ds/ess/"+self.addr, b"data",ephemeral=True, sequence=False)
+
+		# @self.zk.DataWatch('/ess')
+		# def my_func(data, stat):
+		#     print("Data is %s" % data)
+		#     print("Version is %s" % stat.version)
+
+		# @self.zk.ChildrenWatch('/es1')
+		# def my_func(children):
+		#     print "Children are %s" % children
+
+
 
 
 	# handles different message types

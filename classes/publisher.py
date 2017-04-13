@@ -3,6 +3,7 @@ from classes.event import *
 from classes.heartbeat_client import *
 from random import randint
 import logging
+from classes.utils import *
 
 # assumptions:
 # 	only one topic per publisher
@@ -24,9 +25,15 @@ class Publisher:
 	def __init__(self, esAddr, strength ,topic):
 		# self.data = []
 		self.esAddr = esAddr
-		self.socket.connect("tcp://" + esAddr+ ":5555")
+		self.socket.connect("tcp://" + getPullFromAddress(esAddr)) #5555
 		self.topic = topic
 		self.strength = strength
+		# connect to zk client
+		self.zk = KazooClient(hosts='localhost:2181')
+		self.zk.start()
+		self.zk.add_listener(zk_listener)
+		# create and ephimeral node
+		self.zk.create("/ds/pubs/pub", self.__str__().encode('UTF8') ,ephemeral=True, sequence=True)
 
 	def register(self):
 		heartbeatClient(self.pId,self.esAddr).start()
@@ -37,3 +44,7 @@ class Publisher:
 	def publish(self, event):
 		self.socket.send_string("ev{}-{}".format(self.pId, event.serialize()))
 		logger.info('published: ' + event.serialize())
+
+	def __str__(self):
+		publisher = {'topic':self.topic,'os':self.strength} 
+		return json.dumps(publisher)

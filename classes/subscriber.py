@@ -1,6 +1,7 @@
 import zmq
 from random import randint
 import logging
+from classes.utils import *
 
 
 logging.basicConfig(level=logging.INFO)
@@ -21,13 +22,20 @@ class Subscriber:
 	# constructor
 	def __init__(self,esAddr = "127.0.0.1"):
 		# self.data = []
-		self.socket.connect("tcp://" + esAddr + ":6666")
-		self.regSocket.connect("tcp://" + esAddr + ":5555")
+		self.socket.connect("tcp://" + getPubFromAddress(esAddr))
+		self.regSocket.connect("tcp://" + getPullFromAddress(esAddr))
 		# logging.basicConfig(filename="log/{}.log".format('S' + self.addr),level=logging.DEBUG)
+		# connect to zk client
+		self.zk = KazooClient(hosts='localhost:2181')
+		self.zk.start()
+		self.zk.add_listener(zk_listener)
+
 	
 	def register(self,topic):
-		pass
 		# TODO : SEND AN ID LIKE PUBLISHER
+		self.topic = topic #redundant?
+		# create and ephimeral node
+		self.zk.create("/ds/subs/sub", self.__str__().encode('UTF8') ,ephemeral=True, sequence=True)
 		self.regSocket.send_string("rs{}-{}, {}".format(self.sId, self.addr,topic))
 		logger.info( 'register req sent')
 
@@ -35,4 +43,7 @@ class Subscriber:
 		# any subscriber must use the SUBSCRIBE to set a subscription, i.e., tell the
 		# system what it is interested in
 		self.socket.setsockopt_string(zmq.SUBSCRIBE, sFilter.decode('ascii'))
-		logger.info('subscription request to topic {} sent'.format(sFilter)..decode('ascii'))
+		logger.info('subscription request to topic {} sent'.format(sFilter).decode('ascii'))
+	def __str__(self):
+		sub = {'topic':self.topic}
+		return json.dumps(sub)
