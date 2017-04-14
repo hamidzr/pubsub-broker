@@ -24,12 +24,13 @@ def zk_listener(state):
 def printTopView(zk,root):
 	if(zk.exists(root)):
 		rootNodes = zk.get_children(root)
-		print(rootNodes)
+		print('top nodes', rootNodes)
 		for i in rootNodes:
 			subRoots = zk.get_children(root+'/'+i)
-			print('=========')
+			print('=========' + i + '========')
 			for j in subRoots:
-				print(j,'details',zk.get(root +'/'+ i + '/' + j))
+				data,stat = zk.get(root +'/'+ i + '/' + j)
+				print(j,'metadata: ', data)
 
 zk.add_listener(zk_listener)
 root_node = "/ds" # root node for this project
@@ -45,21 +46,16 @@ if zk.exists(root_node):
 	print('cleaning all nodes')
 	zk.delete(root_node,-1,True)
 	print('deleted')
-	zk.create("/ds",b"myData")
-	zk.create("/ds/ess",b"myData")
-	zk.create("/ds/pubs",b"myData")
-	zk.create("/ds/subs",b"myData")
 else:
 	print('there was no node')
-	zk.create("/ds",b"myData")
-	zk.create("/ds/ess",b"myData")
-	zk.create("/ds/pubs",b"myData")
-	zk.create("/ds/subs",b"myData")
 
-print(zk.get_children(root_node))
-print(zk.get_children("/ds/ess"))
-print(zk.get_children("/ds/pubs"))
-print(zk.get_children("/ds/subs"))
+zk.create("/ds",b"myData")
+zk.create("/ds/ess",b"myData")
+zk.create("/ds/pubs",b"myData")
+zk.create("/ds/subs",b"myData")
+# zk.create("/ds/eselection",b"myData")
+printTopView(zk,root_node)
+
 
 print('Done, exiting')
 zk.stop()

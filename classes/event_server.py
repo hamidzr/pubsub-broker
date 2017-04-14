@@ -1,11 +1,12 @@
 import zmq
 import collections
-from classes.heartbeat_server import *
+# from classes.heartbeat_server import *
 from classes.event import *
 import logging
 from random import randint
 import commands
 from classes.utils import *
+import json
 
 
 
@@ -45,8 +46,10 @@ class EventServer:
 		self.zk = KazooClient(hosts='localhost:2181')
 		self.zk.start()
 		self.zk.add_listener(zk_listener)
-		# create and ephimeral node
-		self.zk.create("/ds/ess/"+self.addr, b"data",ephemeral=True, sequence=False)
+		# create and ephimeral node representing yourself
+		es_metadata = {'addr': self.addr}
+		self.zk.create("/ds/ess/es-", b"{}".format(json.dumps(es_metadata)),ephemeral=True, sequence=True)
+		# self.zk.create("/ds/ess/"+self.addr+,ephemeral=True,sequence=False)
 
 		# @self.zk.DataWatch('/ess')
 		# def my_func(data, stat):
@@ -193,9 +196,8 @@ class EventServer:
 		else :
 			logger.info ("no history found")		
 
-
 	def start(self):
-		heartbeatServer(self).start()
+		# heartbeatServer(self).start()
 		logger.info('started')
 		while True:
 			# if the message is an event

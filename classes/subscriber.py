@@ -35,7 +35,7 @@ class Subscriber:
 		# TODO : SEND AN ID LIKE PUBLISHER
 		self.topic = topic #redundant?
 		# create and ephimeral node
-		self.zk.create("/ds/subs/sub", self.__str__().encode('UTF8') ,ephemeral=True, sequence=True)
+		self.zk.create("/ds/subs/sub-", self.__str__().encode('UTF8') ,ephemeral=True, sequence=True)
 		self.regSocket.send_string("rs{}-{}, {}".format(self.sId, self.addr,topic))
 		logger.info( 'register req sent')
 

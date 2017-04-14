@@ -54,3 +54,11 @@ def zk_listener(state):
     else:
         # Handle being connected/reconnected to Zookeeper
         pass
+
+# get the current leader and maybe watch for changes on the leader? 
+def getLeadingEs(zk):
+	ess = zk.get_children('/ds/ess')
+	ess.sort()
+	data,stat = zk.get('/ds/ess/' + ess[0])
+	print('current leader is: ',data)
+	return json.loads(data)

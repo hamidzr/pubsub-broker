@@ -4,16 +4,15 @@ import sys # to get cli args
 import datetime
 import logging
 #create a publisher and pass in intial configuration
+logger = logging.getLogger('publisherInstance')
 
 if len(sys.argv) == 4:
 	# set the variables from the arguments passed	
-	eventserver_address = sys.argv[1]
-	topic = sys.argv[2]
-	owner_strength = sys.argv[3]
+	topic = sys.argv[1]
+	owner_strength = sys.argv[2]
 else:
 	logging.debug( 'no arguments provided, resorting to defaults')
-	eventserver_address = '127.0.0.1'
-	owner_strength = 1
+	owner_strength = 5
 	topic = 'book'
 
 #logging.basicConfig(filename='publishLog.log',level=logging.DEBUG, mode='w')
@@ -24,8 +23,8 @@ else:
 # logger.addHandler(hdlr) 
 # logger.setLevel(logging.INFO)
 
-p1 = Publisher(eventserver_address,owner_strength,topic)
-p1.register()
+p1 = Publisher(owner_strength,topic)
+p1.register(getLeadingEs(p1.zk)['addr'])
 # keep publishing
 while True:
 	body = "body {}".format(randint(0,9))

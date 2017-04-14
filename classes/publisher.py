@@ -1,6 +1,6 @@
 import zmq
 from classes.event import *
-from classes.heartbeat_client import *
+# from classes.heartbeat_client import *
 from random import randint
 import logging
 from classes.utils import *
@@ -22,10 +22,8 @@ class Publisher:
 	socket = context.socket(zmq.PUSH)
 	topic = 'unknown'
     # constructor
-	def __init__(self, esAddr, strength ,topic):
+	def __init__(self, strength ,topic):
 		# self.data = []
-		self.esAddr = esAddr
-		self.socket.connect("tcp://" + getPullFromAddress(esAddr)) #5555
 		self.topic = topic
 		self.strength = strength
 		# connect to zk client
@@ -33,10 +31,12 @@ class Publisher:
 		self.zk.start()
 		self.zk.add_listener(zk_listener)
 		# create and ephimeral node
-		self.zk.create("/ds/pubs/pub", self.__str__().encode('UTF8') ,ephemeral=True, sequence=True)
+		self.zk.create("/ds/pubs/pub-", self.__str__().encode('UTF8') ,ephemeral=True, sequence=True)
 
-	def register(self):
-		heartbeatClient(self.pId,self.esAddr).start()
+	def register(self,esAddr):
+		# heartbeatClient(self.pId,self.esAddr).start()
+		self.esAddr = esAddr
+		self.socket.connect("tcp://" + getPullFromAddress(esAddr)) #5555
 		self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
 		logger.info('register request sent')
 
