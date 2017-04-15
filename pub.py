@@ -23,8 +23,17 @@ else:
 # logger.addHandler(hdlr) 
 # logger.setLevel(logging.INFO)
 
-p1 = Publisher(owner_strength,topic)
-p1.register(getLeadingEs(p1.zk)['addr'])
+p1 = Publisher(owner_strength,topic) 
+leader_node = getLeadingEs(p1.zk)
+leader_data = getNodeData(p1.zk,leader_node)
+# p1.register(leader_data['addr'])
+# watchLeader(p1.zk,leader_node,p1.register(),leader_data['addr'])
+@p1.zk.DataWatch(leader_node)
+def my_func(data,stat):
+	leader = getLeadingEs(p1.zk)
+	print("new leader is",getNodeData(p1.zk,leader))
+	p1.register(getNodeData(p1.zk,leader)['addr'])
+
 # keep publishing
 while True:
 	body = "body {}".format(randint(0,9))

@@ -59,6 +59,16 @@ def zk_listener(state):
 def getLeadingEs(zk):
 	ess = zk.get_children('/ds/ess')
 	ess.sort()
-	data,stat = zk.get('/ds/ess/' + ess[0])
-	print('current leader is: ',data)
+	return '/ds/ess/'+ess[0]
+
+def getNodeData(zk,node_path):
+	data,stat = zk.get(node_path)
 	return json.loads(data)
+
+# watches current leader and if there is a new leader does sth.
+def watchLeader(zk,node_path):
+	@zk.DataWatch(node_path)
+	def my_func(data,stat):
+		leader = getLeadingEs(zk)
+		print("new leader is",getNodeData(zk,leader))
+		# todo somehow let pub and sub handle 

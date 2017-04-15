@@ -20,19 +20,25 @@ class Subscriber:
 
 	
 	# constructor
-	def __init__(self,esAddr = "127.0.0.1"):
+	def __init__(self):
 		# self.data = []
-		self.socket.connect("tcp://" + getPubFromAddress(esAddr))
-		self.regSocket.connect("tcp://" + getPullFromAddress(esAddr))
 		# logging.basicConfig(filename="log/{}.log".format('S' + self.addr),level=logging.DEBUG)
 		# connect to zk client
+		self.isConnected = False
 		self.zk = KazooClient(hosts='localhost:2181')
 		self.zk.start()
 		self.zk.add_listener(zk_listener)
 
 	
-	def register(self,topic):
-		# TODO : SEND AN ID LIKE PUBLISHER
+	def register(self,newEsAddr ,topic):
+		if self.isConnected:
+			self.socket.disconnect("tcp://" + getPubFromAddress(self.esAddr))
+			self.regSocket.disconnect("tcp://" + getPullFromAddress(self.esAddr))
+		self.esAddr = newEsAddr		
+		self.isConnected = True
+
+		self.socket.connect("tcp://" + getPubFromAddress(self.esAddr))
+		self.regSocket.connect("tcp://" + getPullFromAddress(self.esAddr))
 		self.topic = topic #redundant?
 		# create and ephimeral node
 		self.zk.create("/ds/subs/sub-", self.__str__().encode('UTF8') ,ephemeral=True, sequence=True)

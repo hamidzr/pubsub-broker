@@ -3,20 +3,24 @@ from classes.event import *
 import sys # to get cli args
 import datetime
 import logging
-if len(sys.argv) == 3:
-	esAddr = sys.argv[1]
-	topic = sys.argv[2]
+if len(sys.argv) == 2:
+	topic = sys.argv[1]
 else:
-	logging.debug( 'no arguments provided, resorting to defaults')
-	esAddr = '127.0.0.1'
-	topic = 'book'
-
+	print('bad arg')
+	sys.exit()
 #create a subscriber
-s1 = Subscriber(esAddr)
+s1 = Subscriber()
 # set the variables from the arguments passed
 #subscribe to a topic
-s1.register(topic)
-s1.subscribe(topic)
+leader_node = getLeadingEs(s1.zk)
+leader_data = getNodeData(s1.zk,leader_node)
+@s1.zk.DataWatch(leader_node)
+def my_func(data,stat):
+	leader = getLeadingEs(s1.zk)
+	print("new leader is",getNodeData(s1.zk,leader))
+	s1.register(getNodeData(s1.zk,leader)['addr'],topic)
+	s1.subscribe(topic)	
+
 
 
 logger = logging.getLogger('subscribeLog')

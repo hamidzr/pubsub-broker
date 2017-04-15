@@ -26,6 +26,7 @@ class Publisher:
 		# self.data = []
 		self.topic = topic
 		self.strength = strength
+		self.isConnected = False
 		# connect to zk client
 		self.zk = KazooClient(hosts='localhost:2181')
 		self.zk.start()
@@ -33,10 +34,13 @@ class Publisher:
 		# create and ephimeral node
 		self.zk.create("/ds/pubs/pub-", self.__str__().encode('UTF8') ,ephemeral=True, sequence=True)
 
-	def register(self,esAddr):
+	def register(self,newEsAddr):
 		# heartbeatClient(self.pId,self.esAddr).start()
-		self.esAddr = esAddr
-		self.socket.connect("tcp://" + getPullFromAddress(esAddr)) #5555
+		if self.isConnected:
+			self.socket.disconnect("tcp://" + getPullFromAddress(self.esAddr))
+		self.esAddr = newEsAddr		
+		self.isConnected = True
+		self.socket.connect("tcp://" + getPullFromAddress(newEsAddr)) #5555
 		self.socket.send_string("rp{}-{}, {}, {}".format(self.pId, self.addr,self.topic,self.strength))
 		logger.info('register request sent')
 
