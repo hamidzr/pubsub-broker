@@ -10,8 +10,6 @@ import json
 
 
 
-
-
 logging.basicConfig(level=logging.INFO)
 # logging.basicConfig(filename="log/{}.log".format('ES' + self.addr),level=logger.info)
 logger = logging.getLogger(__name__) #Q will this make it shared between all objects?

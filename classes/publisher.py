@@ -50,5 +50,5 @@ class Publisher:
 		logger.info('published: ' + event.serialize())
 
 	def __str__(self):
-		publisher = {'topic':self.topic,'os':self.strength} 
+		publisher = {'pId':self.pId,'topic':self.topic,'os':self.strength} 
 		return json.dumps(publisher)

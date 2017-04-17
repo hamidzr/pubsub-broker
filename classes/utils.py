@@ -56,6 +56,8 @@ def zk_listener(state):
         pass
 
 # get the current leader and maybe watch for changes on the leader? 
+# pre: a zookeeper instance with the node '/ds/ess'
+# post: returns the node address for the child with lowest sequence number as leader
 def getLeadingEs(zk):
 	ess = zk.get_children('/ds/ess')
 	ess.sort()
