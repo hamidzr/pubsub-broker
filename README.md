@@ -1,4 +1,7 @@
 EECS 6381 - Spring 2017
+
+Assignment 3 is in branch "zook" located at https://github.com/hamidzr/distributed-systems/tree/zook
+
 Diagrams: https://docs.google.com/drawings/d/14bH-f1AVngTDV68vKtj1A0qNLBXdYpd2dmdFIFBS38s
 
 Explanation of the project untill feb20:
