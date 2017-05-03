@@ -24,7 +24,7 @@ def my_func(children):
     print ('old',oldPIds,'new',newPIds)
     # calculate which publisher left ( if left )
     oldPIds.difference_update(newPIds)
-    print('leavers',oldPIds)
+    # print('leavers',oldPIds)
 
     # unregister leaving publisher
     for leaver in oldPIds:

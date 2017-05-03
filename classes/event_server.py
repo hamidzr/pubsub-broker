@@ -136,7 +136,7 @@ class EventServer:
 		topic = msgArr[1]
 		subscriber = self.subscriber._make([sId,addr,topic])
 		self.subscribers.append(subscriber)
-		logger.info( 'list of all registered subscribers: ',self.subscribers)
+		logger.info( 'subscriber joined: topic: {}'.format(addr,topic) )
 		self.sendHistory(subscriber)
 
 
